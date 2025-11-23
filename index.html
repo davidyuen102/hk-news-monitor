@@ -21,7 +21,7 @@
             color: white;
             text-align: center;
             padding: 12px;
-            font-size: 1rem; /* 增大 */
+            font-size: 1rem;
             font-weight: 700;
             position: sticky;
             top: 0;
@@ -40,7 +40,7 @@
         .header h1 { margin: 0 0 5px 0; font-size: 2rem; font-weight: 700; }
         .header .meta { 
             color: #7f8c8d;
-            font-size: 0.9rem; /* 增大 */
+            font-size: 0.9rem;
             font-style: italic;
         }
 
@@ -62,17 +62,12 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
         }
-        .source-column:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-        }
-
         .column-header {
             padding: 15px;
             color: white;
             font-weight: 700;
             text-align: center;
-            font-size: 1.3rem; /* 增大 */
+            font-size: 1.3rem;
         }
 
         /* 媒體主題色 */
@@ -88,7 +83,7 @@
         /* --- News Item Card --- */
         .news-item {
             display: block;
-            padding: 15px 0; /* 增加垂直間距 */
+            padding: 15px 0;
             margin-bottom: 10px;
             border-bottom: 1px solid #ecf0f1;
             text-decoration: none;
@@ -97,12 +92,12 @@
         .news-item:last-child { border-bottom: none; margin-bottom: 0; }
         .news-item:hover .news-title { color: #3498db; }
 
-        /* 日期設計 (極度清晰易見) */
+        /* 日期設計 */
         .news-date {
-            font-size: 0.9rem; /* 放大 */
-            color: #2c3e50; /* 強化字體顏色 */
-            background-color: #e0e0e0; /* 淺灰色背景塊 */
-            font-weight: 800; /* 加粗 */
+            font-size: 0.9rem;
+            color: #2c3e50;
+            background-color: #e0e0e0;
+            font-weight: 800;
             display: inline-block;
             padding: 4px 8px;
             border-radius: 4px;
@@ -115,11 +110,33 @@
             font-weight: 500;
             margin-right: 5px;
         }
-
+        /* 標題 */
         .news-title {
-            font-size: 1.1rem; /* 放大 */
+            font-size: 1.1rem;
             font-weight: 650;
             line-height: 1.5;
+        }
+
+        /* --- 狀態標記 --- */
+        .status-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+
+        .tag-death { /* 自殺身亡 */
+            background-color: #e74c3c;
+            color: white;
+        }
+        .tag-attempt { /* 企圖自殺 */
+            background-color: #2ecc71;
+            color: white;
+        }
+        .tag-ambiguous { /* 待定/模糊 */
+            background-color: #f39c12;
+            color: white;
         }
 
         .loading, .empty, .error {
@@ -128,22 +145,20 @@
             color: #95a5a6;
             font-size: 1rem;
         }
-        .error { color: #e74c3c; }
-
     </style>
 </head>
 <body>
 
     <div class="alert-bar">
-        ⚠️ 珍惜生命，請尋求協助：2389 2222 (撒瑪利亞會) | 2382 0000 (生命熱線)
+        ⚠️ 珍惜生命，請尋求協助：2389 2222 (香港撒瑪利亞防止自殺會) | 2382 0000 (生命熱線)
     </div>
 
     <div class="header">
         <h1>香港本地新聞監測站</h1>
         <div class="meta">
             專注於 HK01、東網、星島突發新聞 · 顯示最近 7 日數據
-            <p style="color: #e74c3c; font-weight: bold; margin-top: 10px;">
-                * 註：以下時間為新聞「報導發佈時間」，事件實際發生時間需點擊內文查閱。
+            <p style="color: #c0392b; font-weight: bold; margin-top: 10px;">
+                * 註：**狀態標記**基於標題/摘要關鍵詞推測，準確性非 100%。
             </p>
         </div>
         <div class="meta" id="last-update">更新時間：載入中...</div>
@@ -173,36 +188,40 @@
     </div>
 
     <script>
-        // 設定核心關鍵字：強制加入香港地理詞彙 (本地發生)
+        // 設定核心關鍵字
         const BASE_KEYWORDS = '(自殺 OR 輕生 OR 墮樓 OR 燒炭 OR 倒臥 OR 屍體發現) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:7d';
-        
-        // 排除關鍵字 (過濾股市、樓市、娛樂等雜訊)
         const EXCLUDE_WORDS = ['樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人'];
 
-        // 定義三個來源，並特別處理星島的關鍵字
-        const SOURCES = [
-            { 
-                id: 'list-hk01', 
-                site: 'hk01.com', 
-                querySuffix: '' // 不需要額外關鍵字
-            },
-            { 
-                id: 'list-oncc', 
-                site: 'on.cc', 
-                querySuffix: '' 
-            },
-            { 
-                id: 'list-singtao', 
-                site: 'stheadline.com', 
-                // 針對星島，強制加入「突發」以鎖定 breaking-news/突發 內容
-                querySuffix: '突發' 
+        // 定義狀態判斷關鍵字 (Heuristics)
+        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '身亡'];
+        const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院'];
+
+        // 判斷狀態並返回 HTML 標籤
+        function getSuicideStatus(title) {
+            const text = title;
+            
+            // 檢查是否為自殺身亡
+            if (DEATH_KEYWORDS.some(k => text.includes(k))) {
+                return '<span class="status-tag tag-death">自殺身亡</span>';
             }
+
+            // 檢查是否為企圖自殺/救回
+            if (ATTEMPT_KEYWORDS.some(k => text.includes(k))) {
+                return '<span class="status-tag tag-attempt">企圖自殺</span>';
+            }
+
+            // 預設為待定 (例如：只寫墮樓、燒炭等，未交代狀態)
+            return '<span class="status-tag tag-ambiguous">待定/模糊</span>';
+        }
+
+        const SOURCES = [
+            { id: 'list-hk01', site: 'hk01.com', querySuffix: '' },
+            { id: 'list-oncc', site: 'on.cc', querySuffix: '' },
+            { id: 'list-singtao', site: 'stheadline.com', querySuffix: '突發' } 
         ];
 
         async function fetchNewsForSource(sourceObj) {
             const container = document.getElementById(sourceObj.id);
-            
-            // 組合完整的 Google 搜尋語法
             const fullQuery = `site:${sourceObj.site} ${sourceObj.querySuffix} ${BASE_KEYWORDS}`;
             const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(fullQuery)}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`;
@@ -213,27 +232,29 @@
 
                 if (data.status !== 'ok') throw new Error('API Error');
 
-                // 1. 過濾雜訊
                 let items = data.items.filter(item => {
                     return !EXCLUDE_WORDS.some(badWord => item.title.includes(badWord));
                 });
 
-                // 2. 按時間排序 (最新的在最上面)
                 items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-                // 3. 生成 HTML
                 if (items.length === 0) {
-                    container.innerHTML = `<div class="empty">過去 7 日無相關新聞 (可能未提及具體地點)</div>`;
+                    container.innerHTML = `<div class="empty">過去 7 日無相關新聞</div>`;
                 } else {
                     let html = '<div class="news-list">';
                     items.forEach(item => {
-                        // 格式化時間： YYYY/MM/DD HH:MM
                         const dateObj = new Date(item.pubDate);
                         const dateStr = `${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                        
+                        // 獲取狀態標記
+                        const statusTagHtml = getSuicideStatus(item.title);
 
                         html += `
                             <a href="${item.link}" target="_blank" class="news-item">
-                                <div class="news-date"><span>報導時間：</span>${dateStr}</div>
+                                <div class="news-date">
+                                    <span>報導時間：</span>${dateStr}
+                                    ${statusTagHtml}
+                                </div>
                                 <div class="news-title">${item.title}</div>
                             </a>
                         `;
@@ -248,10 +269,8 @@
             }
         }
 
-        // 主程式：同時執行三個搜尋
         async function init() {
             document.getElementById('last-update').innerText = '更新時間：' + new Date().toLocaleString('zh-HK');
-            
             await Promise.all(SOURCES.map(source => fetchNewsForSource(source)));
         }
 
