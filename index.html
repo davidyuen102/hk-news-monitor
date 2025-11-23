@@ -13,7 +13,6 @@
             margin: 0;
             padding: 0;
             line-height: 1.6;
-            /* position: relative; 已移除 */
         }
 
         /* --- Alert Bar (Mandatory Safety) --- */
@@ -45,11 +44,45 @@
             font-style: italic;
         }
 
+        /* --------------------------------- */
+        /* --- 篩選與排序控制項樣式 --- */
+        /* --------------------------------- */
+        .controls {
+            margin: 15px 0;
+            padding: 10px 0;
+            border-top: 1px solid #ecf0f1;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .controls label {
+            font-weight: 600;
+            color: #34495e;
+            margin-right: 5px;
+            align-self: center;
+        }
+
+        .controls select {
+            padding: 8px 10px;
+            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+            background-color: #f7f9fa;
+            font-size: 1rem;
+            cursor: pointer;
+            min-width: 120px;
+        }
+        /* --------------------------------- */
+
+
         /* --- Layout Grid --- */
         .container {
             max-width: 1300px;
             margin: 0 auto 30px;
             padding: 0 15px;
+            /* 預設在寬屏上是三欄 */
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 25px;
@@ -147,13 +180,44 @@
             background-color: #bdc3c7; 
         }
 
-
         .loading, .empty, .error {
             text-align: center;
             padding: 50px 20px;
             color: #95a5a6;
             font-size: 1rem;
         }
+        
+        /* --------------------------------- */
+        /* --- 新增：響應式設計 (RWD) 優化 --- */
+        /* --------------------------------- */
+        @media (max-width: 768px) {
+            .container {
+                /* 在較小屏幕上，讓欄位堆疊，每個佔滿一行 */
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .header {
+                padding: 15px 10px 10px;
+            }
+            .header h1 {
+                font-size: 1.6rem; /* 縮小標題 */
+            }
+            .news-title {
+                font-size: 1.15rem; /* 縮小報導標題 */
+            }
+            .controls {
+                flex-direction: column; /* 讓篩選控制項在手機上垂直堆疊 */
+                gap: 10px;
+                padding: 10px;
+                align-items: flex-start; /* 讓內容靠左對齊 */
+            }
+            .controls label, .controls select {
+                width: 100%; /* 讓篩選框佔滿寬度 */
+                margin-right: 0;
+                box-sizing: border-box;
+            }
+        }
+        /* --------------------------------- */
     </style>
 </head>
 <body>
@@ -164,19 +228,35 @@
 
     <div class="header">
         <h1>香港本地自殺新聞監測站</h1>
+        
+        <div class="controls">
+            <label for="status-filter">狀態篩選：</label>
+            <select id="status-filter">
+                <option value="all">所有狀態</option>
+                <option value="death">自殺身亡</option>
+                <option value="attempt">企圖自殺</option>
+                <option value="ambiguous">待定/模糊</option>
+            </select>
+
+            <label for="sort-order">排序方式：</label>
+            <select id="sort-order">
+                <option value="newest">最新報導</option>
+                <option value="oldest">最舊報導</option>
+            </select>
+        </div>
         <div class="meta">
             專注於 HK01、東網、星島突發新聞 · 顯示最近 7 日數據
             <p style="color: #c0392b; font-weight: bold; margin-top: 10px;">
                 * 註：**狀態及地區標記**基於標題/摘要關鍵詞推測，準確性非 100%。
             </p>
         </div>
-        <div class="meta" id="last-update">更新時間：載入中...</div>
+        <div class="meta" id="last-update">正在準備...</div>
     </div>
 
     <div class="container">
         <div class="source-column">
-            <div class="column-header header-hk01">HK01</div>
-            <div id="list-hk01" class="news-list">
+            <div class="column-header header-singtao">星島日報 (突發專注)</div>
+            <div id="list-singtao" class="news-list">
                 <div class="loading">搜尋中...</div>
             </div>
         </div>
@@ -189,67 +269,79 @@
         </div>
 
         <div class="source-column">
-            <div class="column-header header-singtao">星島日報 (突發專注)</div>
-            <div id="list-singtao" class="news-list">
+            <div class="column-header header-hk01">HK01</div>
+            <div id="list-hk01" class="news-list">
                 <div class="loading">搜尋中...</div>
             </div>
         </div>
     </div>
 
     <script>
+        // 全局變量，用於儲存所有數據，以支援篩選和排序
+        let ALL_NEWS_DATA = {}; 
+
         // 設定核心關鍵字
         const BASE_KEYWORDS = '(自殺 OR 輕生 OR 墮樓 OR 燒炭 OR 倒臥 OR 屍體發現) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:7d';
         const EXCLUDE_WORDS = ['樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人'];
 
-        // 1. 狀態判斷關鍵字 (已包含 '伏屍', '危坐', '危站')
-        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂', '伏屍'];
+        // 1. 狀態判斷關鍵字
+        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂', '伏屍', '殞命', '倒斃', '魂斷'];
         const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院', '危坐', '危站'];
 
         // 2. 地區判斷關鍵字 
         const DISTRICT_MAP = {
-            // 港島區 (Hong Kong Island)
             '中西': '中西區', '中環': '中西區', '半山': '中西區', '西營盤': '中西區', '上環': '中西區', '堅尼地城': '中西區', '西環': '中西區', '金鐘': '中西區', '般咸道': '中西區', '國際金融中心': '中西區', '國際金融': '中西區', '皇后大道': '中西區', '德輔道': '中西區', '荷李活道': '中西區', '太平山': '中西區',
             '灣仔': '灣仔區', '銅鑼灣': '灣仔區', '跑馬地': '灣仔區', '大坑': '大坑', '掃桿埔': '灣仔區', '禮頓山': '灣仔區', '天后': '灣仔區', '勵德邨': '灣仔區', '崇光': '灣仔區', '會展': '灣仔區', '灣仔街市': '灣仔區', '皇后大道東': '灣仔區', '告士打道': '灣仔區',
             '東區': '東區', '北角': '東區', '鰂魚涌': '東區', '筲箕灣': '東區', '柴灣': '東區', '西灣河': '東區', '杏花邨': '東區', '小西灣': '東區', '康怡花園': '東區', '康山花園': '東區', '漁灣邨': '東區', '環翠邨': '東區', '興華邨': '東區', '太古城': '東區', '鯉魚門公園': '東區',
             '南區': '南區', '黃竹坑': '南區', '大口環': '南區', '薄扶林': '南區', '置富': '南區', '華富': '南區', '華貴': '南區', '香港仔': '南區', '田灣': '南區', '貝沙灣': '南區', '數碼港': '南區', '淺水灣': '南區', '赤柱': '南區', '大潭': '南區', '利東邨': '南區', '海怡半島': '南區', '海洋公園': '南區', '淺水灣道': '南區',
-
-            // 九龍區 (Kowloon)
-            '油尖旺': '油尖旺區', '旺角': '油尖旺區', '油麻地': '油尖旺區', '尖沙咀': '油尖旺區', '大角咀': '油尖旺區', '佐敦': '油尖旺區', '奧運': '油尖旺區', '富榮花園': '油尖旺區', '海富苑': '油尖旺區', '上海街': '油尖旺區', '廣東道': '油尖旺區', '圓方': '油尖旺區', '西九龍站': '油尖旺區', '彌敦道': '油尖旺區',
+            '油尖旺': '油尖旺區', '旺角': '油尖旺區', '油麻地': '油尖旺區', '尖沙咀': '油尖旺區', '大角咀': '油尖旺區', '佐敦': '佐敦區', '奧運': '油尖旺區', '富榮花園': '油尖旺區', '海富苑': '油尖旺區', '上海街': '油尖旺區', '廣東道': '油尖旺區', '圓方': '油尖旺區', '西九龍站': '油尖旺區', '彌敦道': '油尖旺區',
             '深水': '深水埗區', '長沙灣': '深水埗區', '石硤尾': '深水埗區', '荔枝角': '深水埗區', '美孚': '深水埗區', '南山邨': '深水埗區', '蘇屋邨': '深水埗區', '白田邨': '深水埗區', '麗閣邨': '深水埗區', '欽州街': '深水埗區',
             '九龍城': '九龍城區', '紅磡': '九龍城區', '九龍塘': '九龍城區', '土瓜灣': '九龍城區', '何文田': '九龍城區', '啟德': '九龍城區', '啟晴邨': '九龍城區', '德朗邨': '九龍城區', '翔龍灣': '九龍城區', '啟德機場': '九龍城區', '啟德郵輪': '九龍城區',
-            '黃大仙': '黃大仙區', '慈雲山': '慈雲山', '樂富': '黃大仙區', '彩虹': '黃大仙區', '鑽石山': '黃大仙區', '新蒲崗': '黃大仙區', '竹園邨': '黃大仙區', '鳳凰新邨': '黃大仙區', '斧山': '黃大仙區', '龍翔道': '黃大仙區',
+            '黃大仙': '黃大仙區', '慈雲山': '慈雲山', '樂富': '黃大仙區', '彩虹': '黃大仙區', '鑽石山': '鑽石山區', '新蒲崗': '黃大仙區', '竹園邨': '黃大仙區', '鳳凰新邨': '黃大仙區', '斧山': '黃大仙區', '龍翔道': '黃大仙區',
             '觀塘': '觀塘區', '藍田': '觀塘區', '油塘': '觀塘區', '秀茂坪': '觀塘區', '順利': '觀塘區', '樂華': '觀塘區', '麗晶花園': '觀塘區', '啟業邨': '觀塘區', '順天邨': '觀塘區', '翠屏邨': '觀塘區', '鯉魚門': '觀塘區', '創紀之城': '觀塘區', '觀塘碼頭': '觀塘區',
-
-            // 新界區 (New Territories)
             '葵青': '葵青區', '葵涌': '葵青區', '青衣': '青衣區', '荔景': '葵青區', '葵盛': '葵青區', '葵芳': '葵芳區', '長安邨': '葵青區', '長康邨': '葵青區', '青馬大橋': '葵青區', '貨櫃碼頭': '葵青區',
             '荃灣': '荃灣區', '汀九': '荃灣區', '深井': '荃灣區', '馬灣': '荃灣區', '麗城花園': '荃灣區', '愉景新城': '荃灣區', '汀九橋': '荃灣區',
             '屯門': '屯門區', '兆康': '屯門區', '蝴蝶灣': '屯門區', '大興': '屯門區', '友愛邨': '屯門區', '安定邨': '屯門區', '湖景邨': '屯門區', '屯門碼頭': '屯門區',
             '元朗': '元朗區', '天水圍': '元朗區', '錦田': '元朗區', '八鄉': '元朗區', '新田': '元朗區', '屏山': '元朗區', '橫洲': '元朗區', '朗屏邨': '元朗區', '天悅邨': '元朗區', '采葉庭': '元朗區', '元朗大馬路': '元朗區',
             '北區': '北區', '上水': '北區', '粉嶺': '北區', '沙頭角': '北區', '打鼓嶺': '北區', '古洞': '北區', '華明邨': '北區', '嘉福邨': '北區', '清河邨': '北區',
             '大埔': '大埔區', '大埔墟': '大埔區', '廣福': '大埔區', '白石角': '大埔區', '大美督': '大埔區', '科學園': '大埔區', '富善邨': '大埔區', '昌運中心': '大埔區', '大埔海濱': '大埔區',
-            '沙田': '沙田區', '馬鞍山': '沙田區', '大圍': '沙田區', '火炭': '沙田區', '小瀝源': '沙田區', '城門河': '沙田區', '瀝源邨': '沙田區', '禾輋邨': '沙田區', '廣源邨': '沙田區', '博康邨': '沙田區', '新城市廣場': '沙田區', '沙田馬場': '沙田區', '威爾斯醫院': '沙田區',
-            '西貢': '西貢區', '將軍澳': '西貢區', '坑口': '西貢區', '調景嶺': '西貢區', '寶琳': '西貢區', '尚德': '西貢區', '日出康城': '西貢區', '翠林邨': '西貢區', '景林邨': '西貢區', '健明邨': '西貢區', '西貢碼頭': '西貢區',
-            
-            // 離島區 (Islands)
+            '沙田': '沙田區', '馬鞍山': '沙田區', '大圍': '大圍區', '火炭': '沙田區', '小瀝源': '沙田區', '城門河': '沙田區', '瀝源邨': '沙田區', '禾輋邨': '沙田區', '廣源邨': '沙田區', '博康邨': '沙田區', '新城市廣場': '沙田區', '沙田馬場': '沙田區', '威爾斯醫院': '沙田區',
+            '西貢': '西貢區', '將軍澳': '將軍澳區', '坑口': '將軍澳區', '調景嶺': '將軍澳區', '寶琳': '將軍澳區', '尚德': '將軍澳區', '日出康城': '將軍澳區', '翠林邨': '將軍澳區', '景林邨': '將軍澳區', '健明邨': '將軍澳區', '西貢碼頭': '西貢區',
             '離島': '離島區', '東涌': '離島區', '大嶼山': '離島區', '長洲': '離島區', '南丫島': '離島區', '愉景灣': '離島區', '坪洲': '離島區', '梅窩': '離島區', '大澳': '離島區', '赤鱲角': '離島區', '機場': '離島區', '逸東邨': '離島區', '昂坪': '離島區', '天壇大佛': '離島區',
         };
 
-        // 函式 A: 判斷自殺狀態並返回 HTML 標籤
-        function getSuicideStatus(title) {
+        const SOURCES = [
+            { id: 'list-hk01', site: 'hk01.com', querySuffix: '' },
+            { id: 'list-oncc', site: 'on.cc', querySuffix: '' },
+            { id: 'list-singtao', site: 'stheadline.com', querySuffix: '突發' } 
+        ];
+
+        // 函式 A: 判斷自殺狀態並返回狀態字串 (用於內部篩選)
+        function getSuicideStatusString(title) {
             const text = title;
             if (DEATH_KEYWORDS.some(k => text.includes(k))) {
-                return '<span class="status-tag tag-death">自殺身亡</span>';
+                return 'death';
             }
             if (ATTEMPT_KEYWORDS.some(k => text.includes(k))) {
+                return 'attempt';
+            }
+            return 'ambiguous';
+        }
+        
+        // 函式 B: 判斷自殺狀態並返回 HTML 標籤
+        function getSuicideStatusHtml(status) {
+            if (status === 'death') {
+                return '<span class="status-tag tag-death">自殺身亡</span>';
+            }
+            if (status === 'attempt') {
                 return '<span class="status-tag tag-attempt">企圖自殺</span>';
             }
             return '<span class="status-tag tag-ambiguous">待定/模糊</span>';
         }
 
-        // 函式 B: 判斷地區並返回 HTML 標籤
+        // 函式 C: 判斷地區並返回 HTML 標籤
         function getDistrictTag(title) {
             const text = title;
-            // 優先匹配最長的關鍵字 (例如先匹配 '國際金融中心' 再匹配 '中心')，提升準確度
             const sortedKeys = Object.keys(DISTRICT_MAP).sort((a, b) => b.length - a.length);
 
             for (const shortName of sortedKeys) {
@@ -261,18 +353,44 @@
             return '<span class="status-tag tag-district tag-unknown">地區不明</span>';
         }
 
-        const SOURCES = [
-            { id: 'list-hk01', site: 'hk01.com', querySuffix: '' },
-            { id: 'list-oncc', site: 'on.cc', querySuffix: '' },
-            { id: 'list-singtao', site: 'stheadline.com', querySuffix: '突發' } 
-        ];
+        // 函式 D: 渲染單個新聞列表
+        function renderNewsList(containerId, items) {
+            const container = document.getElementById(containerId);
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = `<div class="empty">${container.querySelector('.loading') ? '搜尋中...' : '過去 7 日無相關報導'}</div>`;
+                return;
+            }
 
+            let html = '<div class="news-list">';
+            items.forEach(item => {
+                const dateObj = new Date(item.pubDate);
+                const dateStr = `${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                
+                const statusTagHtml = getSuicideStatusHtml(item._status);
+                const districtTagHtml = getDistrictTag(item.title);
+
+                html += `
+                    <a href="${item.link}" target="_blank" class="news-item">
+                        <div class="news-date">
+                            <span>報導時間：</span>${dateStr}
+                            ${statusTagHtml}
+                            ${districtTagHtml}
+                        </div>
+                        <div class="news-title">${item.title}</div>
+                    </a>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // 函式 E: 獲取單個來源的數據
         async function fetchNewsForSource(sourceObj) {
-            const container = document.getElementById(sourceObj.id);
             const fullQuery = `site:${sourceObj.site} ${sourceObj.querySuffix} ${BASE_KEYWORDS}`;
             const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(fullQuery)}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`;
-
+            
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
@@ -283,47 +401,79 @@
                     return !EXCLUDE_WORDS.some(badWord => item.title.includes(badWord));
                 });
 
-                items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-
-                if (items.length === 0) {
-                    container.innerHTML = `<div class="empty">過去 7 日無相關新聞</div>`;
-                } else {
-                    let html = '<div class="news-list">';
-                    items.forEach(item => {
-                        const dateObj = new Date(item.pubDate);
-                        const dateStr = `${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
-                        
-                        const statusTagHtml = getSuicideStatus(item.title);
-                        const districtTagHtml = getDistrictTag(item.title);
-
-                        html += `
-                            <a href="${item.link}" target="_blank" class="news-item">
-                                <div class="news-date">
-                                    <span>報導時間：</span>${dateStr}
-                                    ${statusTagHtml}
-                                    ${districtTagHtml}
-                                </div>
-                                <div class="news-title">${item.title}</div>
-                            </a>
-                        `;
-                    });
-                    html += '</div>';
-                    container.innerHTML = html;
-                }
+                // 預處理數據，加入狀態標籤和日期物件，方便後續篩選排序
+                items = items.map(item => ({
+                    ...item,
+                    _status: getSuicideStatusString(item.title),
+                    _date: new Date(item.pubDate)
+                }));
+                
+                return items;
 
             } catch (error) {
                 console.error(error);
-                container.innerHTML = '<div class="error">載入失敗，請稍後重試。</div>';
+                return 'ERROR'; // 返回錯誤標記
             }
         }
+        
+        // 函式 F: 根據篩選和排序條件，重新渲染所有新聞欄位
+        function renderAllColumns() {
+            const statusFilter = document.getElementById('status-filter').value;
+            const sortOrder = document.getElementById('sort-order').value;
 
+            SOURCES.forEach(source => {
+                const rawItems = ALL_NEWS_DATA[source.id];
+                
+                if (rawItems === 'ERROR') {
+                    document.getElementById(source.id).innerHTML = '<div class="error">數據載入失敗。</div>';
+                    return;
+                }
+
+                // 1. 篩選
+                let filteredItems = rawItems;
+                if (statusFilter !== 'all') {
+                    filteredItems = rawItems.filter(item => item._status === statusFilter);
+                }
+
+                // 2. 排序
+                let sortedItems = filteredItems.sort((a, b) => {
+                    if (sortOrder === 'newest') {
+                        return b._date - a._date; // 降序 (新到舊)
+                    } else {
+                        return a._date - b._date; // 升序 (舊到新)
+                    }
+                });
+
+                // 3. 渲染
+                renderNewsList(source.id, sortedItems);
+            });
+        }
+
+
+        // 初始化函式
         async function init() {
+            // UX 優化 1: 載入狀態更新
+            document.getElementById('last-update').innerText = '正在獲取並分析三個新聞源的數據...';
+
+            const fetchPromises = SOURCES.map(source => fetchNewsForSource(source));
+            const results = await Promise.all(fetchPromises);
+
+            // 儲存數據到全局變量
+            SOURCES.forEach((source, index) => {
+                ALL_NEWS_DATA[source.id] = results[index];
+            });
+            
+            // 首次渲染和設置事件監聽器
+            renderAllColumns();
+
+            // UX 優化 2: 設置事件監聽器 (當篩選或排序選項改變時，重新渲染)
+            document.getElementById('status-filter').addEventListener('change', renderAllColumns);
+            document.getElementById('sort-order').addEventListener('change', renderAllColumns);
+
             document.getElementById('last-update').innerText = '更新時間：' + new Date().toLocaleString('zh-HK');
-            await Promise.all(SOURCES.map(source => fetchNewsForSource(source)));
         }
 
         init();
-
     </script>
 </body>
 </html>
