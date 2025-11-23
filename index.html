@@ -106,45 +106,44 @@
             text-transform: uppercase;
         }
         
-        /* 日期標籤文字 (已強化對比度) */
+        /* 日期標籤文字 */
         .news-date span {
-            color: #2c3e50; /* <-- 強化，使用深色 */
-            font-weight: 600; /* 提高字重 */
+            color: #2c3e50;
+            font-weight: 600;
             margin-right: 5px;
         }
         
-        /* 標題 */
+        /* 標題 (已放大) */
         .news-title {
-            font-size: 1.2rem;
+            font-size: 1.3rem; /* <-- 再次放大 */
             font-weight: 650;
             line-height: 1.5;
         }
 
-        /* --- 狀態標記 --- */
+        /* --- 狀態標記 (已放大、加粗、統一黑色文字) --- */
         .status-tag {
-            font-size: 0.85rem;
-            font-weight: 700;
+            font-size: 0.95rem; /* <-- 放大 */
+            font-weight: 800; /* <-- 加粗 */
             padding: 4px 8px;
             border-radius: 4px;
             margin-left: 10px;
             white-space: nowrap;
+            color: #000; /* <-- 統一黑色文字 */
         }
 
-        /* 1. 自殺狀態標記 (白色文字對深色背景，對比度高) */
-        .tag-death { background-color: #e74c3c; color: white; }
-        .tag-attempt { background-color: #2ecc71; color: white; }
-        .tag-ambiguous { background-color: #f39c12; color: white; }
+        /* 1. 自殺狀態標記 */
+        .tag-death { background-color: #e74c3c; } 
+        .tag-attempt { background-color: #2ecc71; }
+        .tag-ambiguous { background-color: #f39c12; }
 
-        /* 2. 地區標記 (白色文字對深色背景，對比度高) */
+        /* 2. 地區標記 */
         .tag-district {
             background-color: #3498db;
-            color: white;
-            font-weight: 600;
+            font-weight: 800;
         }
-        /* 地區不明標記 (深色文字對淺色背景，確保對比度) */
+        /* 地區不明標記 */
         .tag-unknown {
             background-color: #bdc3c7; 
-            color: #333; 
         }
 
 
