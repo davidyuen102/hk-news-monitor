@@ -113,22 +113,22 @@
             margin-right: 5px;
         }
         
-        /* 標題 (已放大) */
+        /* 標題 */
         .news-title {
-            font-size: 1.3rem; /* <-- 再次放大 */
+            font-size: 1.3rem;
             font-weight: 650;
             line-height: 1.5;
         }
 
         /* --- 狀態標記 (已放大、加粗、統一黑色文字) --- */
         .status-tag {
-            font-size: 0.95rem; /* <-- 放大 */
-            font-weight: 800; /* <-- 加粗 */
+            font-size: 0.95rem;
+            font-weight: 800;
             padding: 4px 8px;
             border-radius: 4px;
             margin-left: 10px;
             white-space: nowrap;
-            color: #000; /* <-- 統一黑色文字 */
+            color: #000;
         }
 
         /* 1. 自殺狀態標記 */
@@ -200,8 +200,8 @@
         const BASE_KEYWORDS = '(自殺 OR 輕生 OR 墮樓 OR 燒炭 OR 倒臥 OR 屍體發現) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:7d';
         const EXCLUDE_WORDS = ['樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人'];
 
-        // 1. 狀態判斷關鍵字 (Heuristics)
-        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡'];
+        // 1. 狀態判斷關鍵字 (已新增 '亡' 和 '返魂')
+        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂'];
         const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院'];
 
         // 2. 地區判斷關鍵字 (18區及主要地標)
