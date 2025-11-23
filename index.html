@@ -105,41 +105,46 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
+        
+        /* 日期標籤文字 (已強化對比度) */
         .news-date span {
-            color: #7f8c8d;
-            font-weight: 500;
+            color: #2c3e50; /* <-- 強化，使用深色 */
+            font-weight: 600; /* 提高字重 */
             margin-right: 5px;
         }
+        
         /* 標題 */
         .news-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 650;
             line-height: 1.5;
         }
 
         /* --- 狀態標記 --- */
         .status-tag {
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            padding: 3px 6px;
-            border-radius: 3px;
+            padding: 4px 8px;
+            border-radius: 4px;
             margin-left: 10px;
-            white-space: nowrap; /* 防止標記斷行 */
+            white-space: nowrap;
         }
 
-        /* 1. 自殺狀態標記 */
+        /* 1. 自殺狀態標記 (白色文字對深色背景，對比度高) */
         .tag-death { background-color: #e74c3c; color: white; }
         .tag-attempt { background-color: #2ecc71; color: white; }
         .tag-ambiguous { background-color: #f39c12; color: white; }
 
-        /* 2. 地區標記 */
+        /* 2. 地區標記 (白色文字對深色背景，對比度高) */
         .tag-district {
-            background-color: #3498db; /* 藍色 */
+            background-color: #3498db;
             color: white;
             font-weight: 600;
         }
+        /* 地區不明標記 (深色文字對淺色背景，確保對比度) */
         .tag-unknown {
-            background-color: #bdc3c7; /* 灰色 */
+            background-color: #bdc3c7; 
+            color: #333; 
         }
 
 
@@ -242,7 +247,6 @@
         // 函式 B: 判斷地區並返回 HTML 標籤
         function getDistrictTag(title) {
             const text = title;
-            // 由於標題通常較短，使用更精確的包含匹配
             for (const shortName in DISTRICT_MAP) {
                 if (text.includes(shortName)) {
                     const districtName = DISTRICT_MAP[shortName];
@@ -284,9 +288,7 @@
                         const dateObj = new Date(item.pubDate);
                         const dateStr = `${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
                         
-                        // 獲取狀態標記 (自殺身亡/企圖)
                         const statusTagHtml = getSuicideStatus(item.title);
-                        // 獲取地區標記
                         const districtTagHtml = getDistrictTag(item.title);
 
                         html += `
