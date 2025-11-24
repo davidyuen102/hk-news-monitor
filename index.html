@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港本地自殺新聞監測站 (HK01/東網/星島 - 7日)</title>
+    <title>香港本地自殺/自殘新聞監測站 (HK01/東網/星島 - 3日)</title>
     
     <style>
         /* --- General Reset & Typography --- */
@@ -17,7 +17,7 @@
             scroll-behavior: smooth; 
         }
 
-        /* --- Alert Bar (Mandatory Safety) --- */
+        /* --- Alert Bar --- */
         .alert-bar {
             background-color: #e74c3c;
             color: white;
@@ -47,9 +47,7 @@
             font-style: italic;
         }
 
-        /* ----------------------------------- */
-        /* --- 右上角資訊小工具樣式 --- */
-        /* ----------------------------------- */
+        /* --- Info Widget --- */
         .info-widget {
             position: absolute;
             top: 20px;
@@ -72,12 +70,8 @@
             border-bottom: 2px solid #3498db;
             padding-bottom: 3px;
         }
-        /* ----------------------------------- */
 
-
-        /* --------------------------------- */
-        /* --- 篩選與排序控制項樣式 (含重置按鈕) --- */
-        /* --------------------------------- */
+        /* --- Controls --- */
         .controls {
             margin: 20px 0;
             padding: 15px 0;
@@ -90,13 +84,7 @@
             flex-wrap: wrap;
         }
 
-        .controls label {
-            font-weight: 700;
-            color: #34495e;
-            margin-right: 5px;
-            align-self: center;
-        }
-
+        .controls label { font-weight: 700; color: #34495e; margin-right: 5px; }
         .controls select, .controls input[type="text"] {
             padding: 10px 12px;
             border-radius: 6px; 
@@ -106,292 +94,95 @@
             min-width: 130px;
             flex-grow: 1; 
             max-width: 320px;
-            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; 
             box-sizing: border-box;
         }
-        .controls select:focus, .controls input[type="text"]:focus {
-            border-color: #3498db;
-            outline: none;
-        }
         
-        /* 🚥 Active Filter Indicator */
-        .controls select.active-control, 
-        .controls input[type="text"].active-control {
+        .controls select.active-control, .controls input[type="text"].active-control {
             border-color: #3498db;
             box-shadow: 0 0 8px rgba(52, 152, 219, 0.6); 
             background-color: #ecf6ff; 
         }
 
-        /* ❌ 搜索欄清空按鈕容器 */
-        .search-wrapper {
-            position: relative;
-            flex-grow: 1; 
-            max-width: 320px;
-        }
-        .search-wrapper input {
-            width: 100%;
-        }
+        .search-wrapper { position: relative; flex-grow: 1; max-width: 320px; }
+        .search-wrapper input { width: 100%; }
         .clear-button {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #95a5a6;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 5px;
-            line-height: 1;
-            font-size: 1.2rem;
-            visibility: hidden; 
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: #95a5a6; font-weight: bold; cursor: pointer;
+            font-size: 1.2rem; visibility: hidden; 
         }
-        .clear-button:hover {
-            color: #34495e;
-        }
-        .clear-button.visible {
-            visibility: visible;
-        }
+        .clear-button.visible { visibility: visible; }
 
-        /* 🔄 篩選重置按鈕 */
         .reset-button {
-            background-color: #7f8c8d;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-left: 10px;
+            background-color: #7f8c8d; color: white; border: none; padding: 10px 15px;
+            border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-left: 10px;
         }
-        .reset-button:hover {
-            background-color: #95a5a6;
-        }
-        /* --------------------------------- */
 
-
-        /* --- Layout Grid --- */
+        /* --- Layout --- */
         .container {
-            max-width: 1400px;
-            margin: 0 auto 40px;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px; 
+            max-width: 1400px; margin: 0 auto 40px; padding: 0 20px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; 
         }
 
-        /* --- Source Column & Header --- */
         .source-column {
-            background: white;
-            border-radius: 12px; 
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.08); 
-            transition: transform 0.3s ease;
+            background: white; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); transition: transform 0.3s ease;
         }
-        
-        .source-column:hover {
-            transform: translateY(-3px); 
-        }
+        .source-column:hover { transform: translateY(-3px); }
 
         .column-header {
-            padding: 18px 15px;
-            color: white;
-            font-weight: 700;
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            padding: 18px 15px; color: white; font-weight: 700; font-size: 1.4rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         
-        /* 媒體主題色 */
         .header-hk01 { background-color: #34495e; } 
         .header-oncc { background-color: #f39c12; } 
         .header-singtao { background-color: #e74c3c; } 
 
-        .news-list {
-            padding: 20px;
-            min-height: 250px;
-        }
+        .news-list { padding: 20px; min-height: 250px; }
 
-        /* --- News Item Card (簡潔列表樣式) --- */
+        /* --- News Item --- */
         .news-item {
-            display: block;
-            padding: 15px 5px;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0; 
-            text-decoration: none;
-            color: #2c3e50;
-            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
+            display: block; padding: 15px 5px; margin-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #2c3e50;
+            transition: background-color 0.2s ease, transform 0.2s ease; border-radius: 4px;
         }
-        
         .news-item:hover {
-            background-color: #f0f0f0; 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); 
-            cursor: pointer;
+            background-color: #f0f0f0; transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
         }
-
-        .news-item:hover .news-title { 
-            color: #3498db; 
-            text-decoration: underline;
-        }
-
-        .news-item:last-child { border-bottom: none; margin-bottom: 0; }
-
-
-        /* --- 🎨 骨架屏 Skeleton Screen START --- */
-        .skeleton-item {
-            padding: 15px 5px;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0; 
-        }
-        .skeleton-line {
-            background-color: #e9ecef;
-            height: 10px;
-            border-radius: 3px;
-            margin-bottom: 8px;
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-        .skeleton-line.short { width: 40%; height: 8px; margin-top: 10px; }
-        .skeleton-line.medium { width: 70%; }
-        .skeleton-line.long { width: 95%; }
-
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 0.9; }
-            100% { opacity: 0.6; }
-        }
-        /* --- 骨架屏 Skeleton Screen END --- */
-
+        .news-item:hover .news-title { color: #3498db; text-decoration: underline; }
         
-        /* --- 日期/標籤 & 標題 (保持不變) --- */
-        .news-date {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #555;
-            display: flex; 
-            flex-wrap: wrap; 
-            align-items: center;
-            margin-bottom: 10px; 
-            gap: 8px; 
-        }
-        .absolute-time {
-            font-size: 0.85rem; 
-            color: #95a5a6;
-            font-weight: normal; 
-        }
-        .news-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            line-height: 1.4;
-            margin-top: 5px;
-        }
-        /* --- 狀態標記 (保持不變) --- */
+        .news-date { font-size: 0.9rem; font-weight: 600; color: #555; margin-bottom: 10px; }
+        .absolute-time { font-size: 0.85rem; color: #95a5a6; font-weight: normal; }
+        .news-title { font-size: 1.4rem; font-weight: 700; line-height: 1.4; margin-top: 5px; }
+
         .status-tag {
-            font-size: 0.9rem;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 4px;
-            white-space: nowrap;
-            color: #1c1c1c; 
+            font-size: 0.9rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+            white-space: nowrap; color: #1c1c1c; margin-right: 5px;
         }
         .tag-death { background-color: #f7a2a2; } 
         .tag-attempt { background-color: #a4e6b7; } 
         .tag-ambiguous { background-color: #fce7a2; } 
-        .tag-district {
-            background-color: #dbe9f5; 
-            color: #34495e;
-            font-weight: 700;
-        }
-        .tag-unknown {
-            background-color: #ecf0f1; 
-            color: #7f8c8d;
-        }
+        .tag-district { background-color: #dbe9f5; color: #34495e; }
+        .tag-unknown { background-color: #ecf0f1; color: #7f8c8d; }
 
-        .loading, .empty, .error {
-            text-align: center;
-            padding: 50px 20px;
-            color: #95a5a6;
-            font-size: 1rem;
-        }
+        .loading, .empty, .error { text-align: center; padding: 50px 20px; color: #95a5a6; }
         
-        /* --------------------------------- */
-        /* --- ⬆️ 「返回頂部」浮動按鈕 --- */
-        /* --------------------------------- */
         .back-to-top {
-            display: none; 
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            z-index: 99;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            font-size: 1.5rem;
-            line-height: 45px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: opacity 0.3s;
+            display: none; position: fixed; bottom: 25px; right: 25px; z-index: 99;
+            background-color: #3498db; color: white; border: none; border-radius: 50%;
+            width: 45px; height: 45px; font-size: 1.5rem; line-height: 45px; text-align: center;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-        .back-to-top:hover {
-            background-color: #2980b9;
-        }
-        .back-to-top.visible {
-            display: block;
-        }
+        .back-to-top.visible { display: block; }
 
-        
-        /* --------------------------------- */
-        /* --- 響應式設計 (RWD) 優化 --- */
-        /* --------------------------------- */
         @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 0 10px;
-            }
-            .header {
-                padding-top: 80px; 
-            }
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            .news-title {
-                font-size: 1.25rem;
-            }
-            .controls {
-                flex-direction: column;
-                gap: 10px;
-                padding: 10px;
-                align-items: flex-start;
-            }
-            .controls label, .controls select, .controls .search-wrapper, .controls .reset-button {
-                width: 100%;
-                margin-right: 0;
-                box-sizing: border-box;
-            }
-            /* RWD: 將資訊小工具置於頂部中央 */
-            .info-widget {
-                top: 15px;
-                left: 50%;
-                transform: translateX(-50%);
-                text-align: center;
-                width: 90%;
-            }
-            .controls .reset-button {
-                margin-left: 0; 
-            }
+            .container { grid-template-columns: 1fr; }
+            .header { padding-top: 80px; }
+            .controls { flex-direction: column; align-items: flex-start; }
+            .controls label, .controls select, .controls .search-wrapper, .controls .reset-button { width: 100%; }
+            .info-widget { top: 15px; left: 50%; transform: translateX(-50%); text-align: center; width: 90%; }
         }
-        /* --------------------------------- */
     </style>
 </head>
 <body>
@@ -401,20 +192,19 @@
     </div>
 
     <div class="header">
-        
         <div class="info-widget">
             <div id="current-date-time" class="date-time">載入時間中...</div>
             <div id="current-weather" class="weather">載入天氣中...</div>
         </div>
         
-        <h1>香港本地自殺新聞監測站</h1>
+        <h1>香港本地自殺/自殘新聞監測站</h1>
         
         <div class="controls">
             <label for="status-filter">狀態篩選：</label>
             <select id="status-filter" aria-label="篩選新聞狀態">
                 <option value="all">所有狀態</option>
                 <option value="death">🔴 自殺身亡</option>
-                <option value="attempt">🟢 企圖自殺</option>
+                <option value="attempt">🟢 企圖/自殘</option>
                 <option value="ambiguous">🟠 待定/模糊</option>
             </select>
 
@@ -425,18 +215,16 @@
             </select>
             
             <div class="search-wrapper">
-                <input type="text" id="keyword-search" placeholder="🔍 搜索標題關鍵字..." title="輸入任何關鍵字搜索" aria-label="關鍵字搜索欄">
-                <button type="button" id="clear-search-btn" class="clear-button" aria-label="清空搜索內容">×</button>
+                <input type="text" id="keyword-search" placeholder="🔍 搜索標題關鍵字..." title="輸入任何關鍵字搜索">
+                <button type="button" id="clear-search-btn" class="clear-button">×</button>
             </div>
-            <button type="button" id="reset-filters-btn" class="reset-button" aria-label="重置所有篩選條件">
-                🧹 重置
-            </button>
+            <button type="button" id="reset-filters-btn" class="reset-button">🧹 重置</button>
         </div>
 
         <div class="meta">
-            專注於 HK01、東網、星島突發新聞 · 顯示最近 7 日數據
+            專注於 HK01、東網、星島突發新聞 · **顯示最近 3 日數據**
             <p style="color: #c0392b; font-weight: bold; margin-top: 10px;">
-                * 註：**狀態及地區標記**基於標題/摘要關鍵詞推測，準確性非 100%。
+                * 註：已擴展關鍵詞庫，涵蓋各類自殺及自殘相關字眼。
             </p>
         </div>
         <div class="meta" id="last-update">正在準備...</div>
@@ -447,287 +235,137 @@
             <div class="column-header header-singtao">📰 星島日報 (突發專注)</div>
             <div id="list-singtao" class="news-list"></div>
         </div>
-
         <div class="source-column">
             <div class="column-header header-oncc">🌐 東網 (On.cc)</div>
             <div id="list-oncc" class="news-list"></div>
         </div>
-
         <div class="source-column">
             <div class="column-header header-hk01">📱 HK01</div>
             <div id="list-hk01" class="news-list"></div>
         </div>
     </div>
 
-    <button id="back-to-top-btn" class="back-to-top" aria-label="返回頁面頂部">⬆️</button>
+    <button id="back-to-top-btn" class="back-to-top">⬆️</button>
 
     <script>
         // 全局變量
         let ALL_NEWS_DATA = {}; 
-        const BASE_KEYWORDS = '(自殺 OR 輕生 OR 尋死 OR 尋短 OR 墮樓 OR 燒炭 OR 倒臥 OR 屍體發現 OR 浮屍 OR 食老鼠藥 OR 割脈 OR 服藥 OR 吊頸 OR 投河 OR 服毒) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:7d';
-        const EXCLUDE_WORDS = ['樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人'];
-        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂', '伏屍', '殞命', '倒斃', '魂斷', '浮屍', '溺斃', '證實不治'];
-        const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院', '危坐', '危站', '自殘', '割脈', '服藥', '服毒', '尋短', '清醒'];
         
-        // 🚨 擴展版地區判斷關鍵字列表 (保留原樣)
+        // ==========================================================
+        // 🚨 核心關鍵詞擴展 (when:3d)
+        // 涵蓋：跳樓、燒炭、浮屍、上吊、服藥、割脈、企跳等
+        // ==========================================================
+        const BASE_KEYWORDS = '(自殺 OR 輕生 OR 尋死 OR 尋短 OR 墮樓 OR 跳樓 OR 燒炭 OR 倒臥 OR 屍體發現 OR 浮屍 OR 上吊 OR 吊頸 OR 自縊 OR 割脈 OR 割腕 OR 服毒 OR 吞藥 OR 飲漂白水 OR 企跳 OR 危站 OR 自殘 OR 老鼠藥) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:3d';
+        
+        // 排除詞：避免財經大跌、娛樂劇透等誤判
+        const EXCLUDE_WORDS = ['樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人', '跌市', '大瀉', '演習', '電影', '劇集'];
+        
+        // 狀態分類關鍵詞
+        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂', '伏屍', '殞命', '倒斃', '魂斷', '浮屍', '溺斃', '自縊', '吊頸'];
+        const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院', '危坐', '危站', '自殘', '割脈', '割傷', '清醒', '半昏迷'];
+        
+        // 地區判斷
         const DISTRICT_MAP = {
-            /* --------------------------------- */
-            /* 港島 (Hong Kong Island) */
-            /* --------------------------------- */
-            // 中西區 (Central and Western)
-            '中西': '中西區', '中環': '中西區', '半山': '中西區', '西營盤': '中西區', '上環': '中西區', '堅尼地城': '中西區', '西環': '中西區', '金鐘': '中西區', '般咸道': '中西區', '山頂': '中西區', '太平山': '中西區', '石塘咀': '中西區', '薄扶林道': '中西區', '堅尼': '中西區',
-            '國際金融中心': '中西區', '國際金融': '中西區', '皇后大道': '中西區', '德輔道': '中西區', '荷李活道': '中西區', '摩星嶺': '中西區', '維多利亞城': '中西區',
-            
-            // 灣仔區 (Wan Chai)
-            '灣仔': '灣仔區', '銅鑼灣': '灣仔區', '跑馬地': '灣仔區', '大坑': '灣仔區', '掃桿埔': '灣仔區', '禮頓山': '灣仔區', '天后': '灣仔區', '勵德邨': '灣仔區', '崇光': '灣仔區', '會展': '灣仔區', '鵝頸': '灣仔區', '立德里': '灣仔區', '利園': '灣仔區', '維多利亞公園': '灣仔區', '銅鑼灣道': '灣仔區',
-            
-            // 東區 (Eastern)
-            '東區': '東區', '北角': '東區', '鰂魚涌': '東區', '筲箕灣': '東區', '柴灣': '東區', '西灣河': '東區', '杏花邨': '東區', '小西灣': '東區', '康怡花園': '東區', '康山花園': '東區', '太古城': '東區', '炮台山': '東區', '藍灣半島': '東區', '興華邨': '東區', '漁灣邨': '東區', '環翠邨': '東區', '城市花園': '東區', '和富中心': '東區', '太古坊': '東區',
-            
-            // 南區 (Southern)
-            '南區': '南區', '黃竹坑': '南區', '大口環': '南區', '薄扶林': '南區', '置富': '南區', '華富': '南區', '華貴': '南區', '香港仔': '南區', '田灣': '南區', '貝沙灣': '南區', '數碼港': '南區', '淺水灣': '南區', '赤柱': '南區', '大潭': '南區', '利東邨': '南區', '海怡半島': '南區', '鴨脷洲': '南區', '深水灣': '南區', '石澳': '南區', '舂坎角': '南區', '壽臣山': '南區', '海洋公園': '南區', '鴨脷': '南區',
-
-
-            /* --------------------------------- */
-            /* 九龍 (Kowloon) */
-            /* --------------------------------- */
-            // 油尖旺區 (Yau Tsim Mong)
-            '油尖旺': '油尖旺區', '旺角': '油尖旺區', '油麻地': '油尖旺區', '尖沙咀': '油尖旺區', '大角咀': '油尖旺區', '佐敦': '油尖旺區', '奧運': '油尖旺區', '富榮花園': '油尖旺區', '海富苑': '油尖旺區', '廣東道': '油尖旺區', '圓方': '油尖旺區', '西九龍站': '油尖旺區', '彌敦道': '油尖旺區', '太子': '油尖旺區', '窩打老道': '油尖旺區', '中港城': '油尖旺區', '朗豪坊': '油尖旺區', '雅蘭': '油尖旺區',
-            
-            // 深水埗區 (Sham Shui Po)
-            '深水': '深水埗區', '長沙灣': '深水埗區', '石硤尾': '深水埗區', '荔枝角': '深水埗區', '美孚': '深水埗區', '南山邨': '深水埗區', '蘇屋邨': '深水埗區', '白田邨': '深水埗區', '麗閣邨': '深水埗區', '欽州街': '深水埗區', '又一村': '深水埗區', '李鄭屋': '深水埗區', '元州邨': '深水埗區', '富昌邨': '深水埗區', '西九龍中心': '深水埗區', '黃金電腦': '深水埗區',
-            
-            // 九龍城區 (Kowloon City)
-            '九龍城': '九龍城區', '紅磡': '九龍城區', '九龍塘': '九龍城區', '土瓜灣': '九龍城區', '何文田': '九龍城區', '啟德': '九龍城區', '啟晴邨': '九龍城區', '德朗邨': '九龍城區', '翔龍灣': '九龍城區', '愛民邨': '九龍城區', '黃埔': '九龍城區', '海逸豪園': '九龍城區', '又一城': '九龍城區', '浸大': '九龍城區', '理大': '九龍城區', '馬頭圍': '九龍城區', '馬頭角': '九龍城區', '九龍灣公園': '九龍城區',
-            
-            // 黃大仙區 (Wong Tai Sin)
-            '黃大仙': '黃大仙區', '慈雲山': '黃大仙區', '樂富': '黃大仙區', '彩虹': '黃大仙區', '鑽石山': '黃大仙區', '新蒲崗': '黃大仙區', '竹園邨': '黃大仙區', '鳳凰新邨': '黃大仙區', '斧山': '黃大仙區', '龍翔道': '黃大仙區', '牛池灣': '黃大仙區', '東頭邨': '黃大仙區', '橫頭磡': '黃大仙區', '天馬苑': '黃大仙區', '彩雲邨': '黃大仙區', '坪石邨': '黃大仙區',
-            
-            // 觀塘區 (Kwun Tong)
-            '觀塘': '觀塘區', '藍田': '觀塘區', '油塘': '觀塘區', '秀茂坪': '觀塘區', '順利': '觀塘區', '樂華': '觀塘區', '麗晶花園': '觀塘區', '啟業邨': '觀塘區', '順天邨': '觀塘區', '翠屏邨': '觀塘區', '鯉魚門': '觀塘區', '創紀之城': '觀塘區', '牛頭角': '觀塘區', '九龍灣': '觀塘區', '德福花園': '觀塘區', '淘大花園': '觀塘區', '曉麗苑': '觀塘區', '高俊苑': '觀塘區', '安達邨': '觀塘區', '安泰邨': '觀塘區',
-
-
-            /* --------------------------------- */
-            /* 新界 (New Territories) */
-            /* --------------------------------- */
-            // 葵青區 (Kwai Tsing)
-            '葵青': '葵青區', '葵涌': '葵青區', '青衣': '葵青區', '荔景': '葵青區', '葵盛': '葵青區', '葵芳': '葵青區', '長安邨': '葵青區', '長康邨': '葵青區', '青衣邨': '葵青區', '長宏邨': '葵青區', '長發邨': '葵青區', '石籬': '葵青區', '大窩口': '葵青區', '貨櫃碼頭': '葵青區', '青衣橋': '葵青區', '青馬大橋': '葵青區', '美景花園': '葵青區',
-            
-            // 荃灣區 (Tsuen Wan)
-            '荃灣': '荃灣區', '汀九': '荃灣區', '深井': '荃灣區', '馬灣': '荃灣區', '麗城花園': '荃灣區', '愉景新城': '荃灣區', '綠楊新邨': '荃灣區', '象山邨': '荃灣區', '福來邨': '荃灣區', '石圍角': '荃灣區', '海之戀': '荃灣區', '荃威': '荃灣區', '荃景圍': '荃灣區', '油柑頭': '荃灣區', '汀九橋': '荃灣區',
-            
-            // 屯門區 (Tuen Mun)
-            '屯門': '屯門區', '兆康': '屯門區', '蝴蝶灣': '屯門區', '大興': '屯門區', '友愛邨': '屯門區', '安定邨': '屯門區', '湖景邨': '屯門區', '屯門碼頭': '屯門區', '良景邨': '屯門區', '田景邨': '屯門區', '寶田': '屯門區', '山景邨': '屯門區', '三聖': '屯門區', '置樂': '屯門區', '黃金海岸': '屯門區', '小欖': '屯門區', '藍地': '屯門區', '大欖': '屯門區',
-            
-            // 元朗區 (Yuen Long)
-            '元朗': '元朗區', '天水圍': '元朗區', '錦田': '元朗區', '八鄉': '元朗區', '新田': '元朗區', '屏山': '元朗區', '橫洲': '元朗區', '朗屏邨': '元朗區', '天悅邨': '元朗區', '采葉庭': '元朗區', '洪水橋': '元朗區', '廈村': '元朗區', '流浮山': '元朗區', '加州': '元朗區', '錦綉': '元朗區', '大棠': '元朗區', '天耀邨': '元朗區', '天瑞邨': '元朗區',
-            
-            // 北區 (North)
-            '北區': '北區', '上水': '北區', '粉嶺': '北區', '沙頭角': '北區', '打鼓嶺': '北區', '古洞': '北區', '華明邨': '北區', '嘉福邨': '北區', '清河邨': '北區', '祥華邨': '北區', '聯和墟': '北區', '蝴蝶山': '北區', '石湖墟': '北區', '軍地': '北區', '坪輋': '北區',
-            
-            // 大埔區 (Tai Po)
-            '大埔': '大埔區', '大埔墟': '大埔區', '廣福': '大埔區', '白石角': '大埔區', '大美督': '大埔區', '科學園': '大埔區', '富善邨': '大埔區', '昌運中心': '大埔區', '大埔中心': '大埔區', '太和': '大埔區', '富亨邨': '大埔區', '運頭塘': '大埔區', '新峰花園': '大埔區', '吐露港': '大埔區',
-            
-            // 沙田區 (Sha Tin)
-            '沙田': '沙田區', '馬鞍山': '沙田區', '大圍': '沙田區', '火炭': '沙田區', '小瀝源': '沙田區', '城門河': '沙田區', '瀝源邨': '沙田區', '禾輋邨': '沙田區', '廣源邨': '沙田區', '博康邨': '沙田區', '新城市廣場': '沙田區', '沙田馬場': '沙田區', '威爾斯醫院': '沙田區', '愉翠苑': '沙田區', '秦石邨': '沙田區', '穗禾苑': '沙田區', '碩門邨': '沙田區', '烏溪沙': '沙田區', '恆安': '沙田區', '顯徑': '沙田區',
-            
-            // 西貢區 (Sai Kung)
-            '西貢': '西貢區', '將軍澳': '西貢區', '坑口': '西貢區', '調景嶺': '西貢區', '寶琳': '西貢區', '尚德': '西貢區', '日出康城': '西貢區', '翠林邨': '西貢區', '景林邨': '西貢區', '健明邨': '西貢區', '西貢碼頭': '西貢區', '蠔涌': '西貢區', '清水灣': '西貢區', '科大': '西貢區', '寶林邨': '西貢區', '厚德邨': '西貢區', '茵怡': '西貢區',
-
-
-            /* --------------------------------- */
-            /* 離島 (Islands) */
-            /* --------------------------------- */
-            // 離島區 (Islands)
-            '離島': '離島區', '東涌': '離島區', '大嶼山': '離島區', '長洲': '離島區', '南丫島': '離島區', '愉景灣': '離島區', '坪洲': '離島區', '梅窩': '離島區', '大澳': '離島區', '赤鱲角': '離島區', '機場': '離島區', '逸東邨': '離島區', '昂坪': '離島區', '欣澳': '離島區', '榕樹灣': '離島區', '索罟灣': '離島區', '貝澳': '離島區', '塘福': '離島區', '迪士尼': '離島區',
+            '中西': '中西區', '中環': '中西區', '半山': '中西區', '西營盤': '中西區', '上環': '中西區', '堅尼': '中西區', '灣仔': '灣仔區', '銅鑼灣': '灣仔區', '跑馬地': '灣仔區', '天后': '灣仔區', '東區': '東區', '北角': '東區', '鰂魚涌': '東區', '筲箕灣': '東區', '柴灣': '東區', '杏花邨': '東區', '小西灣': '東區', '太古城': '東區', '炮台山': '東區', '南區': '南區', '黃竹坑': '南區', '薄扶林': '南區', '置富': '南區', '華富': '南區', '香港仔': '南區', '田灣': '南區', '赤柱': '南區', '鴨脷洲': '南區', '深水灣': '南區', '石澳': '南區', '油尖旺': '油尖旺區', '旺角': '油尖旺區', '油麻地': '油尖旺區', '尖沙咀': '油尖旺區', '大角咀': '油尖旺區', '佐敦': '油尖旺區', '太子': '油尖旺區', '深水': '深水埗區', '長沙灣': '深水埗區', '石硤尾': '深水埗區', '荔枝角': '深水埗區', '美孚': '深水埗區', '南山邨': '深水埗區', '九龍城': '九龍城區', '紅磡': '九龍城區', '九龍塘': '九龍城區', '土瓜灣': '九龍城區', '何文田': '九龍城區', '啟德': '九龍城區', '黃大仙': '黃大仙區', '慈雲山': '黃大仙區', '樂富': '黃大仙區', '彩虹': '黃大仙區', '鑽石山': '黃大仙區', '新蒲崗': '黃大仙區', '牛池灣': '黃大仙區', '觀塘': '觀塘區', '藍田': '觀塘區', '油塘': '觀塘區', '秀茂坪': '觀塘區', '順利': '觀塘區', '牛頭角': '觀塘區', '九龍灣': '觀塘區', '葵青': '葵青區', '葵涌': '葵青區', '青衣': '葵青區', '荔景': '葵青區', '荃灣': '荃灣區', '汀九': '荃灣區', '深井': '荃灣區', '馬灣': '荃灣區', '屯門': '屯門區', '元朗': '元朗區', '天水圍': '元朗區', '錦田': '元朗區', '北區': '北區', '上水': '北區', '粉嶺': '北區', '大埔': '大埔區', '太和': '大埔區', '沙田': '沙田區', '馬鞍山': '沙田區', '大圍': '沙田區', '火炭': '沙田區', '西貢': '西貢區', '將軍澳': '西貢區', '坑口': '西貢區', '調景嶺': '西貢區', '寶琳': '西貢區', '離島': '離島區', '東涌': '離島區', '長洲': '離島區'
         };
+        
         const SOURCES = [
             { id: 'list-hk01', site: 'hk01.com', querySuffix: '' },
             { id: 'list-oncc', site: 'on.cc', querySuffix: '' },
             { id: 'list-singtao', site: 'stheadline.com', querySuffix: '突發' } 
         ];
 
-
-        // -----------------------------------------------------
-        // 核心 UX 函數
-        // -----------------------------------------------------
-
         function updateDateTime() {
             const now = new Date();
-            const dateOptions = { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short' };
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            
-            const dateStr = now.toLocaleDateString('zh-HK', dateOptions);
-            const timeStr = now.toLocaleTimeString('zh-HK', timeOptions);
-
-            const dateTimeElement = document.getElementById('current-date-time');
-            if (dateTimeElement) {
-                dateTimeElement.textContent = `${dateStr} ${timeStr}`;
-            }
+            const dateStr = now.toLocaleDateString('zh-HK', { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short' });
+            const timeStr = now.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            const el = document.getElementById('current-date-time');
+            if (el) el.textContent = `${dateStr} ${timeStr}`;
         }
         
         function updateControlIndicators() {
-            const statusFilter = document.getElementById('status-filter');
-            const sortOrder = document.getElementById('sort-order');
-            const keywordSearch = document.getElementById('keyword-search');
-
-            statusFilter.classList.toggle('active-control', statusFilter.value !== 'all');
-            sortOrder.classList.toggle('active-control', sortOrder.value !== 'newest');
-            keywordSearch.classList.toggle('active-control', keywordSearch.value.trim() !== '');
+            const sf = document.getElementById('status-filter');
+            const so = document.getElementById('sort-order');
+            const ks = document.getElementById('keyword-search');
+            sf.classList.toggle('active-control', sf.value !== 'all');
+            so.classList.toggle('active-control', so.value !== 'newest');
+            ks.classList.toggle('active-control', ks.value.trim() !== '');
         }
 
         function resetFilters() {
             document.getElementById('status-filter').value = 'all';
             document.getElementById('sort-order').value = 'newest';
             document.getElementById('keyword-search').value = '';
-            
             setupSearchClear(); 
             renderAllColumns();
         }
 
         function setupSearchClear() {
-            const searchInput = document.getElementById('keyword-search');
-            const clearButton = document.getElementById('clear-search-btn');
-
-            function toggleClearButton() {
-                clearButton.classList.toggle('visible', searchInput.value.length > 0);
-            }
-
-            clearButton.onclick = () => {
-                searchInput.value = '';
-                toggleClearButton();
-                renderAllColumns(); 
-            };
-
-            searchInput.oninput = () => {
-                toggleClearButton();
-            };
-
-            toggleClearButton();
+            const input = document.getElementById('keyword-search');
+            const btn = document.getElementById('clear-search-btn');
+            function toggle() { btn.classList.toggle('visible', input.value.length > 0); }
+            btn.onclick = () => { input.value = ''; toggle(); renderAllColumns(); };
+            input.oninput = () => toggle();
+            toggle();
         }
         
         function setupBackToTop() {
-            const backToTopBtn = document.getElementById('back-to-top-btn');
-            const scrollThreshold = 300; 
-
+            const btn = document.getElementById('back-to-top-btn');
             window.onscroll = () => {
-                const isVisible = document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold;
-                backToTopBtn.classList.toggle('visible', isVisible);
+                btn.classList.toggle('visible', (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300));
             };
-
-            backToTopBtn.onclick = () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            };
+            btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function setupLinkPreload() {
-            document.querySelectorAll('.news-item').forEach(item => {
-                const linkUrl = item.href;
-                if (!linkUrl) return;
-
-                item.addEventListener('mouseover', () => {
-                    const link = document.createElement('link');
-                    link.rel = 'prefetch';
-                    link.href = linkUrl;
-                    document.head.appendChild(link);
-                    
-                    setTimeout(() => link.remove(), 60000); 
-                }, { once: true }); 
-            });
-        }
-
-
-        // -----------------------------------------------------
-        // 輔助函數
-        // -----------------------------------------------------
         function formatRelativeTime(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffInSeconds = Math.floor((now - date) / 1000);
-
-            const intervals = [
-                { limit: 31536000, label: '年前' }, { limit: 2592000, label: '個月前' },
-                { limit: 86400, label: '日前' }, { limit: 3600, label: '小時前' },
-                { limit: 60, label: '分鐘前' }, { limit: 1, label: '秒前' }
-            ];
-
-            for (let i = 0; i < intervals.length; i++) {
-                const interval = intervals[i];
-                if (diffInSeconds >= interval.limit) {
-                    const count = Math.floor(diffInSeconds / interval.limit);
-                    return count + interval.label;
-                }
-            }
-            return "幾秒前";
+            const diff = Math.floor((new Date() - new Date(dateString)) / 1000);
+            if (diff < 60) return "剛剛";
+            if (diff < 3600) return Math.floor(diff / 60) + "分鐘前";
+            if (diff < 86400) return Math.floor(diff / 3600) + "小時前";
+            return Math.floor(diff / 86400) + "日前";
         }
 
         function getSuicideStatusString(title) {
-            const text = title;
-            if (DEATH_KEYWORDS.some(k => text.includes(k))) return 'death';
-            if (ATTEMPT_KEYWORDS.some(k => text.includes(k))) return 'attempt';
+            if (DEATH_KEYWORDS.some(k => title.includes(k))) return 'death';
+            if (ATTEMPT_KEYWORDS.some(k => title.includes(k))) return 'attempt';
             return 'ambiguous';
         }
 
         function getSuicideStatusHtml(status) {
             if (status === 'death') return '<span class="status-tag tag-death">🔴 自殺身亡</span>';
-            if (status === 'attempt') return '<span class="status-tag tag-attempt">🟢 企圖自殺</span>';
+            if (status === 'attempt') return '<span class="status-tag tag-attempt">🟢 企圖/自殘</span>';
             return '<span class="status-tag tag-ambiguous">🟠 待定/模糊</span>';
         }
         
-        // ⚠️ 地區判斷函數
         function getDistrictTag(title) { 
-            const text = title;
-            // 按長度排序，確保「深水埗」優先於「深水」
-            const sortedKeys = Object.keys(DISTRICT_MAP).sort((a, b) => b.length - a.length);
-
-            for (const shortName of sortedKeys) {
-                if (text.includes(shortName)) {
-                    const districtName = DISTRICT_MAP[shortName];
-                    return `<span class="status-tag tag-district">${districtName}</span>`;
-                }
+            const keys = Object.keys(DISTRICT_MAP).sort((a, b) => b.length - a.length);
+            for (const k of keys) {
+                if (title.includes(k)) return `<span class="status-tag tag-district">${DISTRICT_MAP[k]}</span>`;
             }
             return '<span class="status-tag tag-district tag-unknown">地區不明</span>';
         }
 
-        function renderSkeletonScreen(containerId, count = 5) {
-            const container = document.getElementById(containerId);
-            let html = '';
-            for (let i = 0; i < count; i++) {
-                html += `
-                    <div class="skeleton-item">
-                        <div class="skeleton-line short"></div>
-                        <div class="skeleton-line long"></div>
-                        <div class="skeleton-line medium"></div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
+        function renderSkeletonScreen(id) {
+            document.getElementById(id).innerHTML = Array(3).fill('<div class="skeleton-item"><div class="skeleton-line short"></div><div class="skeleton-line long"></div><div class="skeleton-line medium"></div></div>').join('');
         }
 
-        function renderNewsList(containerId, items) {
-            const container = document.getElementById(containerId);
-            
+        function renderNewsList(id, items) {
+            const container = document.getElementById(id);
             if (!items || items.length === 0) {
-                container.innerHTML = `<div class="empty">過去 7 日無相關報導</div>`;
+                container.innerHTML = `<div class="empty">過去 3 日無相關報導</div>`;
                 return;
             }
-
-            let html = '<div class="news-list-content">'; // 使用一個新的 div 包裹
+            let html = '<div class="news-list-content">';
             items.forEach(item => {
-                const dateObj = new Date(item.pubDate);
-                const dateStr = `${dateObj.getFullYear()}/${(dateObj.getMonth()+1).toString().padStart(2, '0')}/${dateObj.getDate().toString().padStart(2, '0')} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
-                
-                const relativeTime = formatRelativeTime(item.pubDate);
-                const statusTagHtml = getSuicideStatusHtml(item._status);
-                const districtTagHtml = getDistrictTag(item.title);
-
+                const d = item._date;
+                const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 html += `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-date">
-                            <span>發佈時間：</span>${relativeTime} 
+                            <span>${formatRelativeTime(item.pubDate)}</span>
                             <span class="absolute-time">(${dateStr})</span>
-                            ${statusTagHtml}
-                            ${districtTagHtml}
+                            ${getSuicideStatusHtml(item._status)}
+                            ${getDistrictTag(item.title)}
                         </div>
                         <div class="news-title">${item.title}</div>
                     </a>
@@ -737,138 +375,91 @@
             container.innerHTML = html;
         }
 
-        // 引入了 Debounce 函數，以優化搜索和篩選的性能
         function debounce(func, wait) {
             let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
+            return function(...args) {
                 clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
+                timeout = setTimeout(() => func(...args), wait);
             };
         }
 
-
         async function fetchNewsForSource(sourceObj) {
             const fullQuery = `site:${sourceObj.site} ${sourceObj.querySuffix} ${BASE_KEYWORDS}`;
-            // 注意：使用 RSS2JSON API 獲取 Google News RSS。
             const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(fullQuery)}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`;
             
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
-
                 if (data.status !== 'ok') throw new Error('API Error');
 
-                let items = data.items.filter(item => {
-                    // 過濾掉不相關的關鍵詞
-                    return !EXCLUDE_WORDS.some(badWord => item.title.includes(badWord));
-                });
-
-                items = items.map(item => ({
+                let items = data.items.filter(item => !EXCLUDE_WORDS.some(w => item.title.includes(w)));
+                
+                return items.map(item => ({
                     ...item,
                     _status: getSuicideStatusString(item.title),
-                    _date: new Date(item.pubDate) // 轉換為 Date 對象用於排序
+                    _date: new Date(item.pubDate)
                 }));
-                
-                return items;
-
             } catch (error) {
-                console.error(`Error fetching news for ${sourceObj.site}:`, error);
+                console.error(error);
                 return 'ERROR'; 
             }
         }
         
         function renderAllColumns() {
-            const statusFilter = document.getElementById('status-filter').value;
-            const sortOrder = document.getElementById('sort-order').value;
-            const keyword = document.getElementById('keyword-search').value.toLowerCase(); 
+            const sf = document.getElementById('status-filter').value;
+            const so = document.getElementById('sort-order').value;
+            const kw = document.getElementById('keyword-search').value.toLowerCase();
             
-            updateControlIndicators(); 
+            updateControlIndicators();
 
             SOURCES.forEach(source => {
-                const rawItems = ALL_NEWS_DATA[source.id];
-                
-                if (rawItems === 'ERROR') {
-                    document.getElementById(source.id).innerHTML = '<div class="error">數據載入失敗。</div>';
+                const raw = ALL_NEWS_DATA[source.id];
+                if (raw === 'ERROR') {
+                    document.getElementById(source.id).innerHTML = '<div class="error">數據載入失敗 (RSS API 繁忙)。<br>請稍後重試。</div>';
                     return;
                 }
+                if (!raw) return;
 
-                // 1. 關鍵詞過濾
-                let filteredItems = rawItems.filter(item => {
-                    return item.title.toLowerCase().includes(keyword);
-                });
-
-                // 2. 狀態過濾
-                let filterValue = statusFilter; // 直接使用 filter.value
-
-                if (filterValue !== 'all') {
-                    filteredItems = filteredItems.filter(item => item._status === filterValue);
-                }
-
-                // 3. 排序
-                let sortedItems = filteredItems.sort((a, b) => {
-                    // b._date - a._date (最新) 或 a._date - b._date (最舊)
-                    return sortOrder === 'newest' ? b._date - a._date : a._date - b._date; 
-                });
-
-                renderNewsList(source.id, sortedItems);
+                let filtered = raw.filter(item => item.title.toLowerCase().includes(kw));
+                if (sf !== 'all') filtered = filtered.filter(item => item._status === sf);
+                
+                filtered.sort((a, b) => so === 'newest' ? b._date - a._date : a._date - b._date);
+                renderNewsList(source.id, filtered);
             });
-            
-            setupLinkPreload();
         }
 
-
-        // -----------------------------------------------------
-        // 🚀 初始化函式 (已補全)
-        // -----------------------------------------------------
         async function init() {
-            // 設置虛擬天氣數據 (不實際呼叫天氣 API)
-            const weatherElement = document.getElementById('current-weather');
-            if (weatherElement) {
-                weatherElement.innerHTML = '晴朗 ☀️ 24°C (濕度 45%)<br><span style="font-size: 0.8em; font-weight: 500; color: #95a5a6;">(天氣數據為快照)</span>';
-            }
+            const weather = document.getElementById('current-weather');
+            if (weather) weather.innerHTML = '晴朗 ☀️ 24°C (數據快照)';
             
-            // 設置時間更新
             updateDateTime();
-            setInterval(updateDateTime, 1000); 
+            setInterval(updateDateTime, 1000);
             
-            // 顯示骨架屏
-            SOURCES.forEach(source => renderSkeletonScreen(source.id));
+            SOURCES.forEach(s => renderSkeletonScreen(s.id));
 
-            // 並行獲取所有數據
-            const fetchPromises = SOURCES.map(source => fetchNewsForSource(source));
-            const results = await Promise.all(fetchPromises);
+            const promises = SOURCES.map(source => fetchNewsForSource(source));
+            const results = await Promise.all(promises);
 
-            // 存儲數據
-            SOURCES.forEach((source, index) => {
-                ALL_NEWS_DATA[source.id] = results[index];
-            });
+            SOURCES.forEach((s, i) => ALL_NEWS_DATA[s.id] = results[i]);
+            
+            renderAllColumns();
 
-            // 設置篩選/搜索事件監聽器 (使用 Debounce 優化)
             const debouncedRender = debounce(renderAllColumns, 300);
-
             document.getElementById('status-filter').addEventListener('change', renderAllColumns);
             document.getElementById('sort-order').addEventListener('change', renderAllColumns);
             document.getElementById('keyword-search').addEventListener('input', debouncedRender);
             document.getElementById('reset-filters-btn').addEventListener('click', resetFilters);
             
-            // 首次渲染所有數據
-            renderAllColumns();
-
-            // 設置其他 UI 邏輯
             setupSearchClear();
             setupBackToTop();
             
-            // 更新最後更新時間
             const now = new Date();
             document.getElementById('last-update').textContent = `數據更新於：${now.toLocaleDateString('zh-HK')} ${now.toLocaleTimeString('zh-HK')}`;
+            
+            setInterval(renderAllColumns, 60000);
         }
 
-        // 頁面加載完成後執行初始化
         window.addEventListener('load', init);
     </script>
 </body>
