@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港本地自殺/自殘新聞監測站 (HK01/東網/星島 - 3日)</title>
+    <title>香港本地自殺/自殘新聞監測站 (HK01/東網/星島 - 嚴格3日)</title>
     
     <style>
         /* --- General Reset & Typography --- */
@@ -17,7 +17,7 @@
             scroll-behavior: smooth; 
         }
 
-        /* --- Alert Bar --- */
+        /* --- Alert Bar (Mandatory Safety) --- */
         .alert-bar {
             background-color: #e74c3c;
             color: white;
@@ -84,7 +84,13 @@
             flex-wrap: wrap;
         }
 
-        .controls label { font-weight: 700; color: #34495e; margin-right: 5px; }
+        .controls label {
+            font-weight: 700;
+            color: #34495e;
+            margin-right: 5px;
+            align-self: center;
+        }
+
         .controls select, .controls input[type="text"] {
             padding: 10px 12px;
             border-radius: 6px; 
@@ -94,94 +100,286 @@
             min-width: 130px;
             flex-grow: 1; 
             max-width: 320px;
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; 
             box-sizing: border-box;
         }
+        .controls select:focus, .controls input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
         
-        .controls select.active-control, .controls input[type="text"].active-control {
+        /* 🚥 Active Filter Indicator */
+        .controls select.active-control, 
+        .controls input[type="text"].active-control {
             border-color: #3498db;
             box-shadow: 0 0 8px rgba(52, 152, 219, 0.6); 
             background-color: #ecf6ff; 
         }
 
-        .search-wrapper { position: relative; flex-grow: 1; max-width: 320px; }
-        .search-wrapper input { width: 100%; }
+        /* ❌ 搜索欄清空按鈕容器 */
+        .search-wrapper {
+            position: relative;
+            flex-grow: 1; 
+            max-width: 320px;
+        }
+        .search-wrapper input {
+            width: 100%;
+        }
         .clear-button {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; color: #95a5a6; font-weight: bold; cursor: pointer;
-            font-size: 1.2rem; visibility: hidden; 
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #95a5a6;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+            font-size: 1.2rem;
+            visibility: hidden; 
         }
-        .clear-button.visible { visibility: visible; }
+        .clear-button:hover {
+            color: #34495e;
+        }
+        .clear-button.visible {
+            visibility: visible;
+        }
 
+        /* 🔄 篩選重置按鈕 */
         .reset-button {
-            background-color: #7f8c8d; color: white; border: none; padding: 10px 15px;
-            border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-left: 10px;
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-left: 10px;
+        }
+        .reset-button:hover {
+            background-color: #95a5a6;
         }
 
-        /* --- Layout --- */
+        /* --- Layout Grid --- */
         .container {
-            max-width: 1400px; margin: 0 auto 40px; padding: 0 20px;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; 
+            max-width: 1400px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px; 
         }
 
+        /* --- Source Column & Header --- */
         .source-column {
-            background: white; border-radius: 12px; overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); transition: transform 0.3s ease;
-        }
-        .source-column:hover { transform: translateY(-3px); }
-
-        .column-header {
-            padding: 18px 15px; color: white; font-weight: 700; font-size: 1.4rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: white;
+            border-radius: 12px; 
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.08); 
+            transition: transform 0.3s ease;
         }
         
+        .source-column:hover {
+            transform: translateY(-3px); 
+        }
+
+        .column-header {
+            padding: 18px 15px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        /* 媒體主題色 */
         .header-hk01 { background-color: #34495e; } 
         .header-oncc { background-color: #f39c12; } 
         .header-singtao { background-color: #e74c3c; } 
 
-        .news-list { padding: 20px; min-height: 250px; }
+        .news-list {
+            padding: 20px;
+            min-height: 250px;
+        }
 
-        /* --- News Item --- */
+        /* --- News Item Card (簡潔列表樣式) --- */
         .news-item {
-            display: block; padding: 15px 5px; margin-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #2c3e50;
-            transition: background-color 0.2s ease, transform 0.2s ease; border-radius: 4px;
+            display: block;
+            padding: 15px 5px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0; 
+            text-decoration: none;
+            color: #2c3e50;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
         }
-        .news-item:hover {
-            background-color: #f0f0f0; transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
-        }
-        .news-item:hover .news-title { color: #3498db; text-decoration: underline; }
         
-        .news-date { font-size: 0.9rem; font-weight: 600; color: #555; margin-bottom: 10px; }
-        .absolute-time { font-size: 0.85rem; color: #95a5a6; font-weight: normal; }
-        .news-title { font-size: 1.4rem; font-weight: 700; line-height: 1.4; margin-top: 5px; }
+        .news-item:hover {
+            background-color: #f0f0f0; 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); 
+            cursor: pointer;
+        }
 
+        .news-item:hover .news-title { 
+            color: #3498db; 
+            text-decoration: underline;
+        }
+
+        .news-item:last-child { border-bottom: none; margin-bottom: 0; }
+
+
+        /* --- 🎨 骨架屏 Skeleton Screen START --- */
+        .skeleton-item {
+            padding: 15px 5px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0; 
+        }
+        .skeleton-line {
+            background-color: #e9ecef;
+            height: 10px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        .skeleton-line.short { width: 40%; height: 8px; margin-top: 10px; }
+        .skeleton-line.medium { width: 70%; }
+        .skeleton-line.long { width: 95%; }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.6; }
+        }
+        /* --- 骨架屏 Skeleton Screen END --- */
+
+        
+        /* --- 日期/標籤 & 標題 (保持不變) --- */
+        .news-date {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #555;
+            display: flex; 
+            flex-wrap: wrap; 
+            align-items: center;
+            margin-bottom: 10px; 
+            gap: 8px; 
+        }
+        .absolute-time {
+            font-size: 0.85rem; 
+            color: #95a5a6;
+            font-weight: normal; 
+        }
+        .news-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-top: 5px;
+        }
+        /* --- 狀態標記 (保持不變) --- */
         .status-tag {
-            font-size: 0.9rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;
-            white-space: nowrap; color: #1c1c1c; margin-right: 5px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            color: #1c1c1c; 
         }
         .tag-death { background-color: #f7a2a2; } 
         .tag-attempt { background-color: #a4e6b7; } 
         .tag-ambiguous { background-color: #fce7a2; } 
-        .tag-district { background-color: #dbe9f5; color: #34495e; }
-        .tag-unknown { background-color: #ecf0f1; color: #7f8c8d; }
-
-        .loading, .empty, .error { text-align: center; padding: 50px 20px; color: #95a5a6; }
-        
-        .back-to-top {
-            display: none; position: fixed; bottom: 25px; right: 25px; z-index: 99;
-            background-color: #3498db; color: white; border: none; border-radius: 50%;
-            width: 45px; height: 45px; font-size: 1.5rem; line-height: 45px; text-align: center;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        .tag-district {
+            background-color: #dbe9f5; 
+            color: #34495e;
+            font-weight: 700;
         }
-        .back-to-top.visible { display: block; }
+        .tag-unknown {
+            background-color: #ecf0f1; 
+            color: #7f8c8d;
+        }
 
+        .loading, .empty, .error {
+            text-align: center;
+            padding: 50px 20px;
+            color: #95a5a6;
+            font-size: 1rem;
+        }
+        
+        /* --------------------------------- */
+        /* --- ⬆️ 「返回頂部」浮動按鈕 --- */
+        /* --------------------------------- */
+        .back-to-top {
+            display: none; 
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 99;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.5rem;
+            line-height: 45px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s;
+        }
+        .back-to-top:hover {
+            background-color: #2980b9;
+        }
+        .back-to-top.visible {
+            display: block;
+        }
+
+        /* --------------------------------- */
+        /* --- 響應式設計 (RWD) 優化 --- */
+        /* --------------------------------- */
         @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
-            .header { padding-top: 80px; }
-            .controls { flex-direction: column; align-items: flex-start; }
-            .controls label, .controls select, .controls .search-wrapper, .controls .reset-button { width: 100%; }
-            .info-widget { top: 15px; left: 50%; transform: translateX(-50%); text-align: center; width: 90%; }
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 0 10px;
+            }
+            .header {
+                padding-top: 80px; 
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .news-title {
+                font-size: 1.25rem;
+            }
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+                align-items: flex-start;
+            }
+            .controls label, .controls select, .controls .search-wrapper, .controls .reset-button {
+                width: 100%;
+                margin-right: 0;
+                box-sizing: border-box;
+            }
+            .info-widget {
+                top: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+                text-align: center;
+                width: 90%;
+            }
+            .controls .reset-button {
+                margin-left: 0; 
+            }
         }
     </style>
 </head>
@@ -192,12 +390,13 @@
     </div>
 
     <div class="header">
+        
         <div class="info-widget">
             <div id="current-date-time" class="date-time">載入時間中...</div>
             <div id="current-weather" class="weather">載入天氣中...</div>
         </div>
         
-        <h1>香港本地自殺/自殘新聞監測站</h1>
+        <h1>香港本地自殺新聞監測站</h1>
         
         <div class="controls">
             <label for="status-filter">狀態篩選：</label>
@@ -215,16 +414,18 @@
             </select>
             
             <div class="search-wrapper">
-                <input type="text" id="keyword-search" placeholder="🔍 搜索標題關鍵字..." title="輸入任何關鍵字搜索">
-                <button type="button" id="clear-search-btn" class="clear-button">×</button>
+                <input type="text" id="keyword-search" placeholder="🔍 搜索標題關鍵字..." title="輸入任何關鍵字搜索" aria-label="關鍵字搜索欄">
+                <button type="button" id="clear-search-btn" class="clear-button" aria-label="清空搜索內容">×</button>
             </div>
-            <button type="button" id="reset-filters-btn" class="reset-button">🧹 重置</button>
+            <button type="button" id="reset-filters-btn" class="reset-button" aria-label="重置所有篩選條件">
+                🧹 重置
+            </button>
         </div>
 
         <div class="meta">
-            專注於 HK01、東網、星島突發新聞 · **顯示最近 3 日數據**
+            專注於 HK01、東網、星島突發新聞 · **強制過濾：只顯示最近 3 日數據**
             <p style="color: #c0392b; font-weight: bold; margin-top: 10px;">
-                * 註：已擴展關鍵詞庫，涵蓋各類自殺及自殘相關字眼。
+                * 註：已啟用強制日期檢查，確保所有新聞均在 72 小時內發佈。
             </p>
         </div>
         <div class="meta" id="last-update">正在準備...</div>
@@ -235,44 +436,51 @@
             <div class="column-header header-singtao">📰 星島日報 (突發專注)</div>
             <div id="list-singtao" class="news-list"></div>
         </div>
+
         <div class="source-column">
             <div class="column-header header-oncc">🌐 東網 (On.cc)</div>
             <div id="list-oncc" class="news-list"></div>
         </div>
+
         <div class="source-column">
             <div class="column-header header-hk01">📱 HK01</div>
             <div id="list-hk01" class="news-list"></div>
         </div>
     </div>
 
-    <button id="back-to-top-btn" class="back-to-top">⬆️</button>
+    <button id="back-to-top-btn" class="back-to-top" aria-label="返回頁面頂部">⬆️</button>
 
     <script>
         // 全局變量
         let ALL_NEWS_DATA = {}; 
         
-        // ==========================================================
-        // 🚨 核心關鍵詞擴展 (when:3d)
-        // 涵蓋：跳樓、燒炭、浮屍、上吊、服藥、割脈、企跳等
-        // ==========================================================
-        const BASE_KEYWORDS = '(自殺 OR 輕生 OR 尋死 OR 尋短 OR 墮樓 OR 跳樓 OR 燒炭 OR 倒臥 OR 屍體發現 OR 浮屍 OR 上吊 OR 吊頸 OR 自縊 OR 割脈 OR 割腕 OR 服毒 OR 吞藥 OR 飲漂白水 OR 企跳 OR 危站 OR 自殘 OR 老鼠藥) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:3d';
+        // 1. 核心查詢詞：使用 when:3d
+        const BASE_KEYWORDS = '(自殺 OR 輕生 OR 尋死 OR 尋短 OR 墮樓 OR 跳樓 OR 燒炭 OR 倒臥 OR 屍體發現 OR 浮屍 OR 老鼠藥 OR 服食 OR 割脈 OR 割腕 OR 吊頸 OR 投河 OR 投海 OR 服毒 OR 企跳 OR 天台) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:3d';
         
-        // 排除詞：避免財經大跌、娛樂劇透等誤判
-        const EXCLUDE_WORDS = ['樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人', '跌市', '大瀉', '演習', '電影', '劇集'];
+        // 2. 標題關鍵字強制檢查
+        const SUICIDE_KEYWORDS = ['自殺', '輕生', '尋死', '尋短', '墮樓', '跳樓', '燒炭', '倒臥', '屍體發現', '浮屍', '老鼠藥', '服食', '割脈', '割腕', '吊頸', '投河', '投海', '服毒', '企跳', '天台'];
+
+        const EXCLUDE_WORDS = [
+            '樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人', 
+            '經濟', '金融', '投資', '科企', '商業化', '科技園', '富士康', '基金', 'IPO', '上市', 
+            '債券', '指數', '匯率', '樓價', '租金', '買賣', '創業', '創科', '科技', 
+            '娛樂', '明星', '藝人', '演唱會', '紅毯', '時裝', '電影', '劇集', '緋聞', '時尚', 
+            '餐飲', '旅遊', '美食', '演唱會', '球隊', '波',
+            '消防演習', '火警演習', '救援演習', '警隊演習', '體育', '教育', '大學'
+        ];
         
-        // 狀態分類關鍵詞
-        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂', '伏屍', '殞命', '倒斃', '魂斷', '浮屍', '溺斃', '自縊', '吊頸'];
-        const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院', '危坐', '危站', '自殘', '割脈', '割傷', '清醒', '半昏迷'];
+        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂', '伏屍', '殞命', '倒斃', '魂斷', '浮屍', '溺斃', '證實不治', '燒焦'];
+        const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院', '危坐', '危站', '自殘', '割脈', '割傷', '服藥', '服毒', '尋短', '清醒', '企跳', '老鼠藥'];
         
-        // 地區判斷
+        // 地區列表 (保持不變)
         const DISTRICT_MAP = {
-            '中西': '中西區', '中環': '中西區', '半山': '中西區', '西營盤': '中西區', '上環': '中西區', '堅尼': '中西區', '灣仔': '灣仔區', '銅鑼灣': '灣仔區', '跑馬地': '灣仔區', '天后': '灣仔區', '東區': '東區', '北角': '東區', '鰂魚涌': '東區', '筲箕灣': '東區', '柴灣': '東區', '杏花邨': '東區', '小西灣': '東區', '太古城': '東區', '炮台山': '東區', '南區': '南區', '黃竹坑': '南區', '薄扶林': '南區', '置富': '南區', '華富': '南區', '香港仔': '南區', '田灣': '南區', '赤柱': '南區', '鴨脷洲': '南區', '深水灣': '南區', '石澳': '南區', '油尖旺': '油尖旺區', '旺角': '油尖旺區', '油麻地': '油尖旺區', '尖沙咀': '油尖旺區', '大角咀': '油尖旺區', '佐敦': '油尖旺區', '太子': '油尖旺區', '深水': '深水埗區', '長沙灣': '深水埗區', '石硤尾': '深水埗區', '荔枝角': '深水埗區', '美孚': '深水埗區', '南山邨': '深水埗區', '九龍城': '九龍城區', '紅磡': '九龍城區', '九龍塘': '九龍城區', '土瓜灣': '九龍城區', '何文田': '九龍城區', '啟德': '九龍城區', '黃大仙': '黃大仙區', '慈雲山': '黃大仙區', '樂富': '黃大仙區', '彩虹': '黃大仙區', '鑽石山': '黃大仙區', '新蒲崗': '黃大仙區', '牛池灣': '黃大仙區', '觀塘': '觀塘區', '藍田': '觀塘區', '油塘': '觀塘區', '秀茂坪': '觀塘區', '順利': '觀塘區', '牛頭角': '觀塘區', '九龍灣': '觀塘區', '葵青': '葵青區', '葵涌': '葵青區', '青衣': '葵青區', '荔景': '葵青區', '荃灣': '荃灣區', '汀九': '荃灣區', '深井': '荃灣區', '馬灣': '荃灣區', '屯門': '屯門區', '元朗': '元朗區', '天水圍': '元朗區', '錦田': '元朗區', '北區': '北區', '上水': '北區', '粉嶺': '北區', '大埔': '大埔區', '太和': '大埔區', '沙田': '沙田區', '馬鞍山': '沙田區', '大圍': '沙田區', '火炭': '沙田區', '西貢': '西貢區', '將軍澳': '西貢區', '坑口': '西貢區', '調景嶺': '西貢區', '寶琳': '西貢區', '離島': '離島區', '東涌': '離島區', '長洲': '離島區'
+            '中西': '中西區', '中環': '中西區', '半山': '中西區', '西營盤': '中西區', '上環': '中西區', '堅尼': '中西區', '灣仔': '灣仔區', '銅鑼灣': '灣仔區', '跑馬地': '灣仔區', '天后': '灣仔區', '東區': '東區', '北角': '東區', '鰂魚涌': '東區', '筲箕灣': '東區', '柴灣': '東區', '杏花邨': '東區', '小西灣': '東區', '太古城': '東區', '炮台山': '東區', '南區': '南區', '黃竹坑': '南區', '香港仔': '南區', '田灣': '南區', '赤柱': '南區', '鴨脷洲': '南區', '深水灣': '南區', '石澳': '南區', '油尖旺': '油尖旺區', '旺角': '油尖旺區', '油麻地': '油尖旺區', '尖沙咀': '油尖旺區', '大角咀': '油尖旺區', '佐敦': '油尖旺區', '太子': '油尖旺區', '深水': '深水埗區', '長沙灣': '深水埗區', '石硤尾': '深水埗區', '荔枝角': '深水埗區', '美孚': '深水埗區', '南山邨': '深水埗區', '九龍城': '九龍城區', '紅磡': '九龍城區', '九龍塘': '九龍城區', '土瓜灣': '九龍城區', '何文田': '九龍城區', '啟德': '九龍城區', '黃埔': '九龍城區', '黃大仙': '黃大仙區', '慈雲山': '黃大仙區', '樂富': '黃大仙區', '彩虹': '黃大仙區', '鑽石山': '黃大仙區', '新蒲崗': '黃大仙區', '牛池灣': '黃大仙區', '觀塘': '觀塘區', '藍田': '觀塘區', '油塘': '觀塘區', '秀茂坪': '觀塘區', '順利': '觀塘區', '牛頭角': '觀塘區', '九龍灣': '觀塘區', '葵青': '葵青區', '葵涌': '葵青區', '青衣': '葵青區', '荔景': '葵青區', '荃灣': '荃灣區', '汀九': '荃灣區', '深井': '荃灣區', '馬灣': '荃灣區', '屯門': '屯門區', '元朗': '元朗區', '天水圍': '元朗區', '錦田': '元朗區', '北區': '北區', '上水': '北區', '粉嶺': '北區', '大埔': '大埔區', '太和': '大埔區', '沙田': '沙田區', '馬鞍山': '沙田區', '大圍': '沙田區', '火炭': '沙田區', '西貢': '西貢區', '將軍澳': '西貢區', '坑口': '西貢區', '調景嶺': '西貢區', '寶琳': '西貢區', '離島': '離島區', '東涌': '離島區', '長洲': '離島區'
         };
         
         const SOURCES = [
-            { id: 'list-hk01', site: 'hk01.com', querySuffix: '' },
-            { id: 'list-oncc', site: 'on.cc', querySuffix: '' },
-            { id: 'list-singtao', site: 'stheadline.com', querySuffix: '突發' } 
+            { id: 'list-singtao', site: 'stheadline.com', querySuffix: '港聞 OR 突發', includeLocation: false }, 
+            { id: 'list-oncc', site: 'on.cc', querySuffix: '', includeLocation: true }, 
+            { id: 'list-hk01', site: 'hk01.com', querySuffix: '', includeLocation: true } 
         ];
 
         function updateDateTime() {
@@ -352,7 +560,7 @@
         function renderNewsList(id, items) {
             const container = document.getElementById(id);
             if (!items || items.length === 0) {
-                container.innerHTML = `<div class="empty">過去 3 日無相關報導</div>`;
+                container.innerHTML = `<div class="empty">過去 3 日內無相關報導</div>`;
                 return;
             }
             let html = '<div class="news-list-content">';
@@ -384,22 +592,50 @@
         }
 
         async function fetchNewsForSource(sourceObj) {
-            const fullQuery = `site:${sourceObj.site} ${sourceObj.querySuffix} ${BASE_KEYWORDS}`;
+            let coreQuery = ACTION_KEYWORDS;
+            if (sourceObj.includeLocation) {
+                coreQuery += ` ${LOCATION_KEYWORDS}`;
+            }
+
+            // 使用 when:3d
+            const fullQuery = `site:${sourceObj.site} ${sourceObj.querySuffix} ${coreQuery} ${EXCLUDE_WORDS.map(w => '-'+w).join(' ')} when:3d`;
             const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(fullQuery)}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`;
+            // 使用 rss2json
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`;
             
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
+
                 if (data.status !== 'ok') throw new Error('API Error');
 
-                let items = data.items.filter(item => !EXCLUDE_WORDS.some(w => item.title.includes(w)));
+                // 1. 基本關鍵詞過濾
+                let items = data.items.filter(item => {
+                    const title = item.title;
+                    
+                    // A. 必須包含自殺/自殘關鍵詞
+                    const hasSuicideKW = SUICIDE_KEYWORDS.some(k => title.includes(k));
+                    if (!hasSuicideKW) return false;
+
+                    // B. 排除無關詞
+                    const hasExcludeKW = EXCLUDE_WORDS.some(w => title.includes(w));
+                    if (hasExcludeKW) return false;
+
+                    return true;
+                });
                 
-                return items.map(item => ({
+                // 2. 🚀 強制日期過濾：只保留最近 3 天 (72小時) 內的新聞
+                const threeDaysAgo = new Date();
+                threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+                items = items.map(item => ({
                     ...item,
                     _status: getSuicideStatusString(item.title),
                     _date: new Date(item.pubDate)
-                }));
+                })).filter(item => item._date >= threeDaysAgo); // 過濾掉舊新聞
+
+                return items;
+
             } catch (error) {
                 console.error(error);
                 return 'ERROR'; 
@@ -416,7 +652,7 @@
             SOURCES.forEach(source => {
                 const raw = ALL_NEWS_DATA[source.id];
                 if (raw === 'ERROR') {
-                    document.getElementById(source.id).innerHTML = '<div class="error">數據載入失敗 (RSS API 繁忙)。<br>請稍後重試。</div>';
+                    document.getElementById(source.id).innerHTML = '<div class="error">數據載入失敗 (API繁忙)。<br>請稍後重試。</div>';
                     return;
                 }
                 if (!raw) return;
@@ -438,12 +674,16 @@
             
             SOURCES.forEach(s => renderSkeletonScreen(s.id));
 
-            const promises = SOURCES.map(source => fetchNewsForSource(source));
-            const results = await Promise.all(promises);
+            const promises = SOURCES.map(async (s) => {
+                const data = await fetchNewsForSource(s);
+                ALL_NEWS_DATA[s.id] = data;
+                renderAllColumns(); // 載入一個顯示一個
+            });
 
-            SOURCES.forEach((s, i) => ALL_NEWS_DATA[s.id] = results[i]);
-            
-            renderAllColumns();
+            await Promise.all(promises);
+
+            const now = new Date();
+            document.getElementById('last-update').textContent = `數據更新於：${now.toLocaleDateString('zh-HK')} ${now.toLocaleTimeString('zh-HK')}`;
 
             const debouncedRender = debounce(renderAllColumns, 300);
             document.getElementById('status-filter').addEventListener('change', renderAllColumns);
@@ -453,11 +693,6 @@
             
             setupSearchClear();
             setupBackToTop();
-            
-            const now = new Date();
-            document.getElementById('last-update').textContent = `數據更新於：${now.toLocaleDateString('zh-HK')} ${now.toLocaleTimeString('zh-HK')}`;
-            
-            setInterval(renderAllColumns, 60000);
         }
 
         window.addEventListener('load', init);
