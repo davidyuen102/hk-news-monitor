@@ -464,12 +464,12 @@
     <script>
         // 全局變量
         let ALL_NEWS_DATA = {}; 
-        const BASE_KEYWORDS = '(自殺 OR 輕生 OR 墮樓 OR 燒炭 OR 倒臥 OR 屍體發現) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:7d';
+        const BASE_KEYWORDS = '(自殺 OR 輕生 OR 尋死 OR 尋短 OR 墮樓 OR 燒炭 OR 倒臥 OR 屍體發現 OR 浮屍 OR 食老鼠藥 OR 割脈 OR 服藥 OR 吊頸 OR 投河 OR 服毒) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:7d';
         const EXCLUDE_WORDS = ['樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人'];
-        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂', '伏屍', '殞命', '倒斃', '魂斷'];
-        const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院', '危坐', '危站'];
+        const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場', '已證實死亡', '證實死亡', '亡', '返魂', '伏屍', '殞命', '倒斃', '魂斷', '浮屍', '溺斃', '證實不治'];
+        const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院', '危坐', '危站', '自殘', '割脈', '服藥', '服毒', '尋短', '清醒'];
         
-        // 🚨 擴展版地區判斷關鍵字列表
+        // 🚨 擴展版地區判斷關鍵字列表 (保留原樣)
         const DISTRICT_MAP = {
             /* --------------------------------- */
             /* 港島 (Hong Kong Island) */
@@ -549,10 +549,10 @@
 
 
         // -----------------------------------------------------
-        // 核心 UX 函數 (保持不變)
+        // 核心 UX 函數
         // -----------------------------------------------------
 
-        function updateDateTime() { /* ... 保持不變 ... */
+        function updateDateTime() {
             const now = new Date();
             const dateOptions = { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short' };
             const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -566,7 +566,7 @@
             }
         }
         
-        function updateControlIndicators() { /* ... 保持不變 ... */
+        function updateControlIndicators() {
             const statusFilter = document.getElementById('status-filter');
             const sortOrder = document.getElementById('sort-order');
             const keywordSearch = document.getElementById('keyword-search');
@@ -576,7 +576,7 @@
             keywordSearch.classList.toggle('active-control', keywordSearch.value.trim() !== '');
         }
 
-        function resetFilters() { /* ... 保持不變 ... */
+        function resetFilters() {
             document.getElementById('status-filter').value = 'all';
             document.getElementById('sort-order').value = 'newest';
             document.getElementById('keyword-search').value = '';
@@ -585,7 +585,7 @@
             renderAllColumns();
         }
 
-        function setupSearchClear() { /* ... 保持不變 ... */
+        function setupSearchClear() {
             const searchInput = document.getElementById('keyword-search');
             const clearButton = document.getElementById('clear-search-btn');
 
@@ -606,7 +606,7 @@
             toggleClearButton();
         }
         
-        function setupBackToTop() { /* ... 保持不變 ... */
+        function setupBackToTop() {
             const backToTopBtn = document.getElementById('back-to-top-btn');
             const scrollThreshold = 300; 
 
@@ -620,7 +620,7 @@
             };
         }
 
-        function setupLinkPreload() { /* ... 保持不變 ... */
+        function setupLinkPreload() {
             document.querySelectorAll('.news-item').forEach(item => {
                 const linkUrl = item.href;
                 if (!linkUrl) return;
@@ -638,9 +638,9 @@
 
 
         // -----------------------------------------------------
-        // 輔助函數 (保持不變)
+        // 輔助函數
         // -----------------------------------------------------
-        function formatRelativeTime(dateString) { /* ... 保持不變 ... */
+        function formatRelativeTime(dateString) {
             const date = new Date(dateString);
             const now = new Date();
             const diffInSeconds = Math.floor((now - date) / 1000);
@@ -660,19 +660,21 @@
             }
             return "幾秒前";
         }
-        function getSuicideStatusString(title) { /* ... 保持不變 ... */
+
+        function getSuicideStatusString(title) {
             const text = title;
             if (DEATH_KEYWORDS.some(k => text.includes(k))) return 'death';
             if (ATTEMPT_KEYWORDS.some(k => text.includes(k))) return 'attempt';
             return 'ambiguous';
         }
-        function getSuicideStatusHtml(status) { /* ... 保持不變 ... */
+
+        function getSuicideStatusHtml(status) {
             if (status === 'death') return '<span class="status-tag tag-death">🔴 自殺身亡</span>';
             if (status === 'attempt') return '<span class="status-tag tag-attempt">🟢 企圖自殺</span>';
             return '<span class="status-tag tag-ambiguous">🟠 待定/模糊</span>';
         }
         
-        // ⚠️ 地區判斷函數 (使用新的擴展版 DISTRICT_MAP)
+        // ⚠️ 地區判斷函數
         function getDistrictTag(title) { 
             const text = title;
             // 按長度排序，確保「深水埗」優先於「深水」
@@ -687,7 +689,7 @@
             return '<span class="status-tag tag-district tag-unknown">地區不明</span>';
         }
 
-        function renderSkeletonScreen(containerId, count = 5) { /* ... 保持不變 ... */
+        function renderSkeletonScreen(containerId, count = 5) {
             const container = document.getElementById(containerId);
             let html = '';
             for (let i = 0; i < count; i++) {
@@ -702,7 +704,7 @@
             container.innerHTML = html;
         }
 
-        function renderNewsList(containerId, items) { /* ... 保持不變 ... */
+        function renderNewsList(containerId, items) {
             const container = document.getElementById(containerId);
             
             if (!items || items.length === 0) {
@@ -710,7 +712,7 @@
                 return;
             }
 
-            let html = '<div class="news-list">';
+            let html = '<div class="news-list-content">'; // 使用一個新的 div 包裹
             items.forEach(item => {
                 const dateObj = new Date(item.pubDate);
                 const dateStr = `${dateObj.getFullYear()}/${(dateObj.getMonth()+1).toString().padStart(2, '0')}/${dateObj.getDate().toString().padStart(2, '0')} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
@@ -735,8 +737,23 @@
             container.innerHTML = html;
         }
 
-        async function fetchNewsForSource(sourceObj) { /* ... 保持不變 ... */
+        // 引入了 Debounce 函數，以優化搜索和篩選的性能
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+
+        async function fetchNewsForSource(sourceObj) {
             const fullQuery = `site:${sourceObj.site} ${sourceObj.querySuffix} ${BASE_KEYWORDS}`;
+            // 注意：使用 RSS2JSON API 獲取 Google News RSS。
             const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(fullQuery)}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`;
             
@@ -747,24 +764,25 @@
                 if (data.status !== 'ok') throw new Error('API Error');
 
                 let items = data.items.filter(item => {
+                    // 過濾掉不相關的關鍵詞
                     return !EXCLUDE_WORDS.some(badWord => item.title.includes(badWord));
                 });
 
                 items = items.map(item => ({
                     ...item,
                     _status: getSuicideStatusString(item.title),
-                    _date: new Date(item.pubDate)
+                    _date: new Date(item.pubDate) // 轉換為 Date 對象用於排序
                 }));
                 
                 return items;
 
             } catch (error) {
-                console.error(error);
+                console.error(`Error fetching news for ${sourceObj.site}:`, error);
                 return 'ERROR'; 
             }
         }
         
-        function renderAllColumns() { /* ... 保持不變 ... */
+        function renderAllColumns() {
             const statusFilter = document.getElementById('status-filter').value;
             const sortOrder = document.getElementById('sort-order').value;
             const keyword = document.getElementById('keyword-search').value.toLowerCase(); 
@@ -779,17 +797,21 @@
                     return;
                 }
 
+                // 1. 關鍵詞過濾
                 let filteredItems = rawItems.filter(item => {
                     return item.title.toLowerCase().includes(keyword);
                 });
 
-                let filterValue = statusFilter.includes('death') ? 'death' : statusFilter.includes('attempt') ? 'attempt' : statusFilter.includes('ambiguous') ? 'ambiguous' : statusFilter;
+                // 2. 狀態過濾
+                let filterValue = statusFilter; // 直接使用 filter.value
 
                 if (filterValue !== 'all') {
                     filteredItems = filteredItems.filter(item => item._status === filterValue);
                 }
 
+                // 3. 排序
                 let sortedItems = filteredItems.sort((a, b) => {
+                    // b._date - a._date (最新) 或 a._date - b._date (最舊)
                     return sortOrder === 'newest' ? b._date - a._date : a._date - b._date; 
                 });
 
@@ -800,44 +822,54 @@
         }
 
 
-        // 初始化函式
+        // -----------------------------------------------------
+        // 🚀 初始化函式 (已補全)
+        // -----------------------------------------------------
         async function init() {
+            // 設置虛擬天氣數據 (不實際呼叫天氣 API)
             const weatherElement = document.getElementById('current-weather');
             if (weatherElement) {
                 weatherElement.innerHTML = '晴朗 ☀️ 24°C (濕度 45%)<br><span style="font-size: 0.8em; font-weight: 500; color: #95a5a6;">(天氣數據為快照)</span>';
             }
             
+            // 設置時間更新
             updateDateTime();
             setInterval(updateDateTime, 1000); 
             
+            // 顯示骨架屏
             SOURCES.forEach(source => renderSkeletonScreen(source.id));
-            document.getElementById('last-update').innerText = '正在獲取並分析三個新聞源的數據...';
 
-
+            // 並行獲取所有數據
             const fetchPromises = SOURCES.map(source => fetchNewsForSource(source));
             const results = await Promise.all(fetchPromises);
 
+            // 存儲數據
             SOURCES.forEach((source, index) => {
                 ALL_NEWS_DATA[source.id] = results[index];
             });
-            
-            renderAllColumns();
+
+            // 設置篩選/搜索事件監聽器 (使用 Debounce 優化)
+            const debouncedRender = debounce(renderAllColumns, 300);
 
             document.getElementById('status-filter').addEventListener('change', renderAllColumns);
             document.getElementById('sort-order').addEventListener('change', renderAllColumns);
-            document.getElementById('keyword-search').addEventListener('input', renderAllColumns);
+            document.getElementById('keyword-search').addEventListener('input', debouncedRender);
             document.getElementById('reset-filters-btn').addEventListener('click', resetFilters);
+            
+            // 首次渲染所有數據
+            renderAllColumns();
 
+            // 設置其他 UI 邏輯
             setupSearchClear();
             setupBackToTop();
-
-
-            document.getElementById('last-update').innerText = '更新時間：' + new Date().toLocaleString('zh-HK');
             
-            setInterval(renderAllColumns, 60000); 
+            // 更新最後更新時間
+            const now = new Date();
+            document.getElementById('last-update').textContent = `數據更新於：${now.toLocaleDateString('zh-HK')} ${now.toLocaleTimeString('zh-HK')}`;
         }
 
-        init();
+        // 頁面加載完成後執行初始化
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
