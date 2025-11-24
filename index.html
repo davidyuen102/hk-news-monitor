@@ -3,21 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港本地自殺新聞監測站 (HK01/東網/星島 - 強化版)</title>
+    <title>香港本地自殺新聞監測站 (UX強化版 - 三欄並排)</title>
     
     <style>
-        /* --- General Reset & Typography --- */
+        /* --------------------------------- */
+        /* --- 🎨 核心顏色變量 (Light/Dark Mode) --- */
+        /* --------------------------------- */
+        :root {
+            /* Light Mode Defaults */
+            --bg-color: #f4f7f9;
+            --container-bg: white;
+            --text-color: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e0e6ed;
+            --hover-bg: #f0f0f0;
+            --shadow-light: 0 1px 4px rgba(0, 0, 0, 0.05);
+            --shadow-heavy: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.08);
+            --primary-color: #3498db; 
+            
+            /* Status Tags (柔和化顏色) */
+            --tag-death-bg: #f5caca; /* 淺紅 */
+            --tag-attempt-bg: #c9f0d1; /* 淺綠 */
+            --tag-ambiguous-bg: #fcf4cf; /* 淺黃 */
+            --tag-district-bg: #f0f0f0; /* 地區標籤的背景色 */
+
+            /* New & Highlight */
+            --highlight-bg: #ffeb3b;
+            --tag-new-bg: #e67e22; /* 橙色 */
+        }
+
+        /* --------------------------------- */
+        /* --- 🌙 Dark Mode Styles --- */
+        /* --------------------------------- */
+        body.dark-mode {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-muted: #9e9e9e;
+            --border-color: #333333;
+            --hover-bg: #2a2a2a;
+            --shadow-light: 0 1px 4px rgba(0, 0, 0, 0.3);
+            --shadow-heavy: 0 8px 15px rgba(0, 0, 0, 0.5);
+            --primary-color: #5d9cec;
+            
+            --tag-death-bg: #5c3c3c; 
+            --tag-attempt-bg: #3c5c3c; 
+            --tag-ambiguous-bg: #5c5c3c;
+            --tag-district-bg: #333333; /* Dark Mode 地區標籤的背景色 */
+            
+            --highlight-bg: #a37200; /* 深黃 */
+            --tag-new-bg: #d35400; 
+        }
+
+        /* --------------------------------- */
+        /* --- General & Base Styles --- */
+        /* --------------------------------- */
         body {
             font-family: "PingFang TC", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background-color: #f4f7f9; 
-            color: #2c3e50;
+            background-color: var(--bg-color); 
+            color: var(--text-color);
             margin: 0;
             padding: 0;
             line-height: 1.6;
             scroll-behavior: smooth; 
+            transition: background-color 0.3s, color 0.3s; 
         }
-
-        /* --- Alert Bar (Mandatory Safety) --- */
+        
         .alert-bar {
             background-color: #e74c3c;
             color: white;
@@ -31,131 +82,57 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
         }
         
-        /* --- Header & Title --- */
         .header {
             text-align: center;
             padding: 30px 20px 20px;
-            background: white;
+            background: var(--container-bg);
             margin-bottom: 25px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); 
+            box-shadow: var(--shadow-light); 
             position: relative; 
+            transition: background-color 0.3s;
         }
         .header h1 { margin: 0 0 5px 0; font-size: 2.2rem; font-weight: 800; }
         .header .meta { 
-            color: #7f8c8d;
+            color: var(--text-muted);
             font-size: 0.95rem;
             font-style: italic;
         }
-
-        /* ----------------------------------- */
-        /* --- 右上角資訊小工具樣式 --- */
-        /* ----------------------------------- */
         .info-widget {
             position: absolute;
             top: 20px;
             right: 20px;
             text-align: right;
-            color: #34495e;
+            color: var(--text-color);
             font-size: 0.95rem;
             line-height: 1.5;
             z-index: 5;
             font-weight: 600;
         }
-        .info-widget .date-time {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-        }
-        .info-widget .weather {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 3px;
-        }
-        /* ----------------------------------- */
-
-
-        /* --------------------------------- */
-        /* --- 篩選與排序控制項樣式 (含重置按鈕) --- */
-        /* --------------------------------- */
-        .controls {
-            margin: 20px 0;
-            padding: 15px 0;
-            border-top: 1px solid #e0e6ed;
-            border-bottom: 1px solid #e0e6ed;
-            display: flex;
-            justify-content: center;
-            align-items: center; 
-            gap: 25px;
-            flex-wrap: wrap;
-        }
-
-        .controls label {
-            font-weight: 700;
-            color: #34495e;
-            margin-right: 5px;
-            align-self: center;
-        }
-
-        .controls select, .controls input[type="text"] {
-            padding: 10px 12px;
-            border-radius: 6px; 
-            border: 1px solid #c7d1da;
-            background-color: white;
-            font-size: 1rem;
-            min-width: 130px;
-            flex-grow: 1; 
-            max-width: 320px;
-            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; 
-            box-sizing: border-box;
-        }
-        .controls select:focus, .controls input[type="text"]:focus {
-            border-color: #3498db;
-            outline: none;
-        }
-        
-        /* 🚥 Active Filter Indicator */
-        .controls select.active-control, 
-        .controls input[type="text"].active-control {
-            border-color: #3498db;
-            box-shadow: 0 0 8px rgba(52, 152, 219, 0.6); 
-            background-color: #ecf6ff; 
-        }
-
-        /* ❌ 搜索欄清空按鈕容器 */
-        .search-wrapper {
-            position: relative;
-            flex-grow: 1; 
-            max-width: 320px;
-        }
-        .search-wrapper input {
-            width: 100%;
-        }
-        .clear-button {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
+        #mode-toggle {
             background: none;
             border: none;
-            color: #95a5a6;
-            font-weight: bold;
             cursor: pointer;
+            font-size: 1.4rem;
             padding: 5px;
-            line-height: 1;
-            font-size: 1.2rem;
-            visibility: hidden; 
+            margin-left: 15px;
+            color: var(--text-color);
+            transition: color 0.3s;
         }
-        .clear-button:hover {
-            color: #34495e;
-        }
-        .clear-button.visible {
-            visibility: visible;
+        #mode-toggle:hover {
+            color: var(--primary-color);
         }
 
-        /* 🔄 篩選重置按鈕 */
-        .reset-button {
-            background-color: #7f8c8d;
+        /* --------------------------------- */
+        /* --- 🎨 篩選控制項樣式 (Controls) --- */
+        /* --------------------------------- */
+        .controls-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .controls-toggle {
+            display: none; 
+            background: var(--primary-color);
             color: white;
             border: none;
             padding: 10px 15px;
@@ -163,32 +140,115 @@
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.2s;
-            margin-left: 10px;
+            width: 100%;
+            margin-bottom: 10px;
         }
-        .reset-button:hover {
-            background-color: #95a5a6;
+
+        .controls {
+            margin: 20px 0;
+            padding: 15px 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            gap: 25px;
+            flex-wrap: wrap;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out; 
         }
+        .controls.collapsed {
+            max-height: 0;
+            overflow: hidden;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            opacity: 0;
+        }
+
+        .controls label { font-weight: 700; color: var(--text-color); margin-right: 5px; align-self: center; }
+        .controls select, .controls input[type="text"] {
+            padding: 10px 12px;
+            border-radius: 6px; 
+            border: 1px solid var(--border-color);
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            min-width: 130px;
+            flex-grow: 1; 
+            max-width: 320px;
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.3s; 
+            box-sizing: border-box;
+        }
+        .controls select:focus, .controls input[type="text"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        /* Active Filter Indicator & Flash Animation */
+        .controls select.active-control, 
+        .controls input[type="text"].active-control {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px var(--primary-color)33; 
+            background-color: var(--hover-bg); 
+        }
+        .flash-active {
+            animation: filterFlash 0.4s ease-out;
+        }
+        @keyframes filterFlash {
+            0% { box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.5); }
+            100% { box-shadow: none; }
+        }
+
+        /* 活動篩選器總結 */
+        #active-filters-summary {
+            margin-top: -10px;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background-color: var(--hover-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-align: left;
+            opacity: 0;
+            transition: opacity 0.3s, background-color 0.3s;
+            max-width: 960px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #active-filters-summary.visible {
+            opacity: 1;
+        }
+        
         /* --------------------------------- */
-
-
-        /* --- Layout Grid --- */
+        /* --- 列表容器樣式 (Container) - 核心修改 --- */
+        /* --------------------------------- */
         .container {
-            max-width: 1400px;
-            margin: 0 auto 40px;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px; 
+            display: flex; /* 啟用 Flexbox */
+            gap: 25px; /* 欄目間距 */
+            max-width: 1300px; /* 增加最大寬度以容納三欄 */
+            margin: 0 auto 50px auto; /* 居中和底部間距 */
+            padding: 0 20px; /* 左右內邊距 */
+            align-items: stretch; /* 確保三個欄目高度一致 */
         }
 
-        /* --- Source Column & Header --- */
+        /* --------------------------------- */
+        /* --- 列表樣式與單欄內部滾動 --- */
+        /* --------------------------------- */
         .source-column {
-            background: white;
+            background: var(--container-bg);
             border-radius: 12px; 
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.08); 
-            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-heavy); 
+            transition: background-color 0.3s, transform 0.3s ease;
+            display: flex; 
+            flex-direction: column;
+            min-height: 400px;
+            
+            /* 讓三個欄目平均分配寬度 */
+            flex: 1 1 33%; 
         }
         
         .source-column:hover {
@@ -204,182 +264,190 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            flex-shrink: 0; 
+        }
+        .column-header span.count {
+            font-size: 1.1rem;
+            font-weight: 900;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
         }
         
-        /* 媒體主題色 */
+        /* 媒體主題色 (保持不變) */
         .header-hk01 { background-color: #34495e; } 
         .header-oncc { background-color: #f39c12; } 
         .header-singtao { background-color: #e74c3c; } 
 
+        /* 單欄內部滾動容器 */
         .news-list {
             padding: 20px;
+            overflow-y: auto; 
+            max-height: 70vh; /* 最大高度，可根據需求調整 */
             min-height: 250px;
+            flex-grow: 1;
+            transition: opacity 0.4s ease-in-out; 
+        }
+        
+        /* 內容淡入效果的容器 */
+        .news-list-content.fade-in {
+            opacity: 1;
+        }
+        .news-list-content {
+            opacity: 0; 
+            transition: opacity 0.4s ease-in-out;
         }
 
-        /* --- News Item Card (簡潔列表樣式) --- */
+        /* --------------------------------- */
+        /* --- 新聞項目樣式與標籤 --- (已修改) */
+        /* --------------------------------- */
+        
+        .status-tag {
+            display: inline-block;
+            padding: 3px 8px; /* 標籤內邊距 */
+            margin-right: 8px; 
+            margin-top: 4px; /* 稍微與日期分開 */
+            border-radius: 4px; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            white-space: nowrap;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 狀態標籤顏色應用 */
+        .tag-death {
+            background-color: var(--tag-death-bg);
+            color: var(--text-color); /* 確保淺色背景下文字可讀 */
+        }
+        .tag-attempt {
+            background-color: var(--tag-attempt-bg);
+            color: var(--text-color);
+        }
+        .tag-ambiguous {
+            background-color: var(--tag-ambiguous-bg);
+            color: var(--text-color);
+        }
+        .tag-district {
+            /* 預設地區標籤用邊界色或更中性的顏色 */
+            background-color: var(--tag-district-bg); 
+            color: var(--text-color);
+        }
+
         .news-item {
             display: block;
             padding: 15px 5px;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0; 
+            margin-bottom: 15px; 
+            border-bottom: 1px solid var(--border-color); 
             text-decoration: none;
-            color: #2c3e50;
+            color: var(--text-color);
             transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
         }
         
         .news-item:hover {
-            background-color: #f0f0f0; 
+            background-color: var(--hover-bg); 
             transform: translateY(-2px); 
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); 
-            cursor: pointer;
+            box-shadow: var(--shadow-heavy); 
         }
 
-        .news-item:hover .news-title { 
-            color: #3498db; 
-            text-decoration: underline;
+        .news-title {
+            font-size: 1.3rem; 
+            font-weight: 700;
+            line-height: 1.4;
+            margin-top: 5px;
         }
 
-        .news-item:last-child { border-bottom: none; margin-bottom: 0; }
+        /* 搜索關鍵詞高亮 */
+        .highlight-term {
+            background-color: var(--highlight-bg); 
+            color: var(--text-color);
+            padding: 1px 3px;
+            border-radius: 3px;
+            font-weight: 800;
+        }
+        body.dark-mode .highlight-term {
+            background-color: var(--highlight-bg); 
+            color: var(--bg-color);
+        }
+        
+        /* 「新」項目指示器 */
+        .tag-new {
+            background-color: var(--tag-new-bg);
+            color: white; /* 橙色背景配白色字體 */
+            font-weight: 800;
+            animation: pulseNew 2s infinite;
+        }
+        @keyframes pulseNew {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
-
-        /* --- 🎨 骨架屏 Skeleton Screen START --- */
+        /* 骨架屏 */
         .skeleton-item {
             padding: 15px 5px;
             margin-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0; 
+            border-bottom: 1px solid var(--border-color); 
         }
         .skeleton-line {
-            background-color: #e9ecef;
+            background-color: var(--border-color);
             height: 10px;
             border-radius: 3px;
             margin-bottom: 8px;
             animation: pulse 1.5s infinite ease-in-out;
         }
-        .skeleton-line.short { width: 40%; height: 8px; margin-top: 10px; }
-        .skeleton-line.medium { width: 70%; }
-        .skeleton-line.long { width: 95%; }
 
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 0.9; }
-            100% { opacity: 0.6; }
-        }
-        /* --- 骨架屏 Skeleton Screen END --- */
-
-        
-        /* --- 日期/標籤 & 標題 (保持不變) --- */
-        .news-date {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #555;
-            display: flex; 
-            flex-wrap: wrap; 
-            align-items: center;
-            margin-bottom: 10px; 
-            gap: 8px; 
-        }
-        .absolute-time {
-            font-size: 0.85rem; 
-            color: #95a5a6;
-            font-weight: normal; 
-        }
-        .news-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            line-height: 1.4;
-            margin-top: 5px;
-        }
-        /* --- 狀態標記 (保持不變) --- */
-        .status-tag {
-            font-size: 0.9rem;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 4px;
-            white-space: nowrap;
-            color: #1c1c1c; 
-        }
-        .tag-death { background-color: #f7a2a2; } 
-        .tag-attempt { background-color: #a4e6b7; } 
-        .tag-ambiguous { background-color: #fce7a2; } 
-        .tag-district {
-            background-color: #dbe9f5; 
-            color: #34495e;
-            font-weight: 700;
-        }
-        .tag-unknown {
-            background-color: #ecf0f1; 
-            color: #7f8c8d;
-        }
-
-        .loading, .empty, .error {
-            text-align: center;
-            padding: 50px 20px;
-            color: #95a5a6;
-            font-size: 1rem;
-        }
-        
-        /* --------------------------------- */
-        /* --- ⬆️ 「返回頂部」浮動按鈕 --- */
-        /* --------------------------------- */
-        .back-to-top {
-            display: none; 
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            z-index: 99;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            font-size: 1.5rem;
-            line-height: 45px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: opacity 0.3s;
-        }
-        .back-to-top:hover {
-            background-color: #2980b9;
-        }
-        .back-to-top.visible {
-            display: block;
-        }
-
-        
         /* --------------------------------- */
         /* --- 響應式設計 (RWD) 優化 --- */
         /* --------------------------------- */
-        @media (max-width: 768px) {
+        
+        /* 1024px 以下：三欄變為垂直堆疊 */
+        @media (max-width: 1024px) { 
             .container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 0 10px;
+                flex-direction: column; /* 垂直堆疊 */
+                gap: 30px; 
+                max-width: 700px; 
+                padding: 0 15px;
             }
-            .header {
-                padding-top: 80px; 
+            
+            .source-column {
+                flex: 1 1 auto; 
+                min-height: auto; 
             }
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            .news-title {
-                font-size: 1.25rem;
+        }
+        
+        /* 768px 以下：手機樣式 */
+        @media (max-width: 768px) {
+            .controls-toggle {
+                display: block; /* 顯示收合按鈕 */
             }
             .controls {
                 flex-direction: column;
                 gap: 10px;
                 padding: 10px;
                 align-items: flex-start;
+                max-height: 0;
+                overflow: hidden;
+                padding-top: 0;
+                padding-bottom: 0;
+                margin-top: 0;
+                margin-bottom: 0;
+                opacity: 0;
+            }
+            .controls.expanded {
+                max-height: 1000px; 
+                opacity: 1;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                margin-top: 20px;
+                margin-bottom: 20px;
             }
             .controls label, .controls select, .controls .search-wrapper, .controls .reset-button {
                 width: 100%;
                 margin-right: 0;
                 box-sizing: border-box;
             }
-            /* RWD: 將資訊小工具置於頂部中央 */
             .info-widget {
                 top: 15px;
                 left: 50%;
@@ -387,11 +455,14 @@
                 text-align: center;
                 width: 90%;
             }
-            .controls .reset-button {
-                margin-left: 0; 
+            #active-filters-summary {
+                margin-top: 10px;
+            }
+            /* 讓手機端的單欄滾動高度更短，減少頁面滾動 */
+            .news-list {
+                max-height: 50vh; 
             }
         }
-        /* --------------------------------- */
     </style>
 </head>
 <body>
@@ -403,58 +474,77 @@
     <div class="header">
         
         <div class="info-widget">
-            <div id="current-date-time" class="date-time">載入時間中...</div>
+            <div id="current-date-time" class="date-time">
+                載入時間中...
+                <button id="mode-toggle" title="切換深色/淺色模式">🌙</button>
+            </div>
             <div id="current-weather" class="weather">載入天氣中...</div>
+            <div id="cache-status" class="cache-status"></div>
         </div>
         
         <h1>香港本地自殺新聞監測站</h1>
         
-        <div class="controls">
-            <label for="status-filter">狀態篩選：</label>
-            <select id="status-filter" aria-label="篩選新聞狀態">
-                <option value="all">所有狀態</option>
-                <option value="death">🔴 自殺身亡</option>
-                <option value="attempt">🟢 企圖自殺</option>
-                <option value="ambiguous">🟠 待定/模糊</option>
-            </select>
-
-            <label for="sort-order">排序方式：</label>
-            <select id="sort-order" aria-label="新聞排序方式">
-                <option value="newest">由最新排序</option>
-                <option value="oldest">由最舊排序</option>
-            </select>
-            
-            <div class="search-wrapper">
-                <input type="text" id="keyword-search" placeholder="🔍 搜索標題關鍵字..." title="輸入任何關鍵字搜索" aria-label="關鍵字搜索欄">
-                <button type="button" id="clear-search-btn" class="clear-button" aria-label="清空搜索內容">×</button>
-            </div>
-            <button type="button" id="reset-filters-btn" class="reset-button" aria-label="重置所有篩選條件">
-                🧹 重置
+        <div class="controls-wrapper">
+            <button id="controls-toggle-btn" class="controls-toggle">
+                🔽 展開篩選與搜索
             </button>
+            
+            <div id="controls-area" class="controls">
+                <label for="status-filter">狀態篩選：</label>
+                <select id="status-filter" aria-label="篩選新聞狀態">
+                    <option value="all">所有狀態</option>
+                    <option value="death">🔴 自殺身亡</option>
+                    <option value="attempt">🟢 企圖自殺</option>
+                    <option value="ambiguous">🟠 待定/模糊</option>
+                </select>
+
+                <label for="district-filter">地區篩選：</label>
+                <select id="district-filter" aria-label="篩選地區">
+                    <option value="all">所有地區 (18區)</option>
+                    <option value="港島">港島 (中西/灣仔/東區/南區)</option>
+                    <option value="九龍">九龍 (油尖旺/深水埗/九龍城/黃大仙/觀塘)</option>
+                    <option value="新界">新界 (葵青/荃灣/屯門/元朗/北區/大埔/沙田/西貢)</option>
+                    <option value="離島">離島</option>
+                </select>
+
+                <label for="sort-order">排序方式：</label>
+                <select id="sort-order" aria-label="新聞排序方式">
+                    <option value="newest">由最新排序</option>
+                    <option value="oldest">由最舊排序</option>
+                </select>
+                
+                <div class="search-wrapper">
+                    <input type="text" id="keyword-search" placeholder="🔍 搜索標題關鍵字..." title="輸入任何關鍵字搜索" aria-label="關鍵字搜索欄">
+                    <button type="button" id="clear-search-btn" class="clear-button" aria-label="清空搜索內容">×</button>
+                </div>
+                <button type="button" id="reset-filters-btn" class="reset-button" aria-label="重置所有篩選條件">
+                    🧹 重置
+                </button>
+            </div>
+            
+            <div id="active-filters-summary"></div>
         </div>
+
 
         <div class="meta">
             專注於 HK01、東網、星島突發新聞 · 顯示最近 7 日數據
-            <p style="color: #c0392b; font-weight: bold; margin-top: 10px;">
-                * 註：**已強化關鍵詞及地區過濾**，狀態及地區標記基於標題/摘要推測。
-            </p>
         </div>
         <div class="meta" id="last-update">正在準備...</div>
     </div>
 
     <div class="container">
         <div class="source-column">
-            <div class="column-header header-singtao">📰 星島日報 (突發專注)</div>
+            <div class="column-header header-singtao" id="header-list-singtao">📰 星島日報 (突發專注) <span class="count">0</span></div>
             <div id="list-singtao" class="news-list"></div>
         </div>
 
         <div class="source-column">
-            <div class="column-header header-oncc">🌐 東網 (On.cc)</div>
+            <div class="column-header header-oncc" id="header-list-oncc">🌐 東網 (On.cc) <span class="count">0</span></div>
             <div id="list-oncc" class="news-list"></div>
         </div>
 
         <div class="source-column">
-            <div class="column-header header-hk01">📱 HK01</div>
+            <div class="column-header header-hk01" id="header-list-hk01">📱 HK01 <span class="count">0</span></div>
             <div id="list-hk01" class="news-list"></div>
         </div>
     </div>
@@ -462,168 +552,195 @@
     <button id="back-to-top-btn" class="back-to-top" aria-label="返回頁面頂部">⬆️</button>
 
     <script>
-        // 全局變量
+        // -----------------------------------------------------
+        // 核心數據與配置
+        // -----------------------------------------------------
         let ALL_NEWS_DATA = {}; 
-        
-        // 1. 核心查詢詞 (Google Search - 7日)
+        const CACHE_KEY = 'hk_suicide_news_cache';
+        const CACHE_TIMESTAMP_KEY = 'hk_suicide_news_timestamp';
+        let LAST_UPDATE_TIMESTAMP = null; 
+
         const BASE_KEYWORDS = '(自殺 OR 輕生 OR 尋死 OR 尋短 OR 墮樓 OR 跳樓 OR 燒炭 OR 倒臥 OR 屍體發現 OR 浮屍 OR 食老鼠藥 OR 割脈 OR 服藥 OR 吊頸 OR 投河 OR 投海 OR 服毒 OR 企跳 OR 天台) (香港 OR 本地 OR 港島 OR 九龍 OR 新界 OR 離島) when:7d';
-        
-        // 2. 內部精準過濾關鍵詞 (強制檢查)
         const SUICIDE_KEYWORDS = ['自殺', '輕生', '尋死', '尋短', '墮樓', '跳樓', '燒炭', '倒臥', '屍體發現', '浮屍', '食老鼠藥', '服食', '割脈', '割腕', '吊頸', '投河', '投海', '服毒', '企跳', '天台', '尋短見', '割傷'];
-
-        // 3. 排除詞
         const EXCLUDE_WORDS = ['樓市', '股市', '大跌', '劇透', '拍戲', '收視', '股價', '成交', '業主', '名人', '經濟', '金融', '投資', '科企', '商業化', '科技園', '富士康', '基金', 'IPO', '上市', '債券', '指數', '匯率', '樓價', '租金', '買賣', '創業', '創科', '科技', '娛樂', '明星', '藝人', '演唱會', '紅毯', '時裝', '電影', '劇集', '緋聞', '時尚', '餐飲', '旅遊', '美食', '演唱會', '球隊', '波', '消防演習', '火警演習', '救援演習', '警隊演習', '體育', '教育', '大學'];
-
-        // 4. 狀態判斷關鍵詞 (已強化)
         const DEATH_KEYWORDS = ['身亡', '斃命', '屍體', '不治', '當場死亡', '證實死亡', '死亡', '亡', '返魂乏術', '伏屍', '殞命', '倒斃', '魂斷', '浮屍', '溺斃', '證實不治', '身故', '絕命']; 
         const ATTEMPT_KEYWORDS = ['企圖', '獲救', '救回', '制止', '送院', '危坐', '危站', '自殘', '割脈', '服藥', '服毒', '尋短', '清醒', '送院搶救', '昏迷', '燒傷', '勸服', '送院治理', '求醫'];
         
-        // 5. 地區判斷關鍵字列表 (已強化和擴充)
         const DISTRICT_MAP = {
-            /* 港島 (Hong Kong Island) */
-            // 中西區
-            '中西': '中西區', '中環': '中西區', '半山': '中西區', '西營盤': '中西區', '上環': '中西區', '堅尼地城': '中西區', '西環': '中西區', '金鐘': '中西區', '般咸道': '中西區', '山頂': '中西區', '太平山': '中西區', '石塘咀': '中西區', '薄扶林道': '中西區', '堅尼': '中西區', '國際金融中心': '中西區', '皇后大道': '中西區', '德輔道': '中西區', '荷李活道': '中西區', '摩星嶺': '中西區', '維多利亞城': '中西區', 
-            // 灣仔區
-            '灣仔': '灣仔區', '銅鑼灣': '灣仔區', '跑馬地': '灣仔區', '大坑': '灣仔區', '掃桿埔': '灣仔區', '禮頓山': '灣仔區', '天后': '灣仔區', '勵德邨': '灣仔區', '崇光': '灣仔區', '會展': '灣仔區', '鵝頸': '灣仔區', '利園': '灣仔區', '維多利亞公園': '灣仔區', '銅鑼灣道': '灣仔區', '石水渠街': '灣仔區', // NEW Street
-            // 東區
-            '東區': '東區', '北角': '東區', '鰂魚涌': '東區', '筲箕灣': '東區', '柴灣': '東區', '西灣河': '東區', '杏花邨': '東區', '小西灣': '東區', '康怡花園': '東區', '康山花園': '東區', '太古城': '東區', '炮台山': '東區', '藍灣半島': '東區', '興華邨': '東區', '漁灣邨': '東區', '環翠邨': '東區', '城市花園': '東區', '和富中心': '東區', '太古坊': '東區',
-            // 南區
-            '南區': '南區', '黃竹坑': '南區', '大口環': '南區', '薄扶林': '南區', '置富': '南區', '華富': '南區', '華貴': '南區', '香港仔': '南區', '田灣': '南區', '貝沙灣': '南區', '數碼港': '南區', '淺水灣': '南區', '赤柱': '南區', '大潭': '南區', '利東邨': '南區', '海怡半島': '南區', '鴨脷洲': '南區', '深水灣': '南區', '石澳': '南區', '壽臣山': '南區', '海洋公園': '南區', '鴨脷': '南區', '美利樓': '南區', // NEW Landmark
-
-            /* 九龍 (Kowloon) */
-            // 油尖旺區
-            '油尖旺': '油尖旺區', '旺角': '油尖旺區', '油麻地': '油尖旺區', '尖沙咀': '油尖旺區', '大角咀': '油尖旺區', '佐敦': '油尖旺區', '奧運': '油尖旺區', '富榮花園': '油尖旺區', '海富苑': '油尖旺區', '廣東道': '油尖旺區', '圓方': '油尖旺區', '西九龍站': '油尖旺區', '彌敦道': '油尖旺區', '太子': '油尖旺區', '窩打老道': '油尖旺區', '中港城': '油尖旺區', '朗豪坊': '油尖旺區', '雅蘭': '油尖旺區', '歷史博物館': '油尖旺區', // NEW Landmark
-            // 深水埗區
-            '深水': '深水埗區', '長沙灣': '深水埗區', '石硤尾': '深水埗區', '荔枝角': '深水埗區', '美孚': '深水埗區', '南山邨': '深水埗區', '蘇屋邨': '深水埗區', '白田邨': '深水埗區', '麗閣邨': '深水埗區', '欽州街': '深水埗區', '又一村': '深水埗區', '李鄭屋': '深水埗區', '元州邨': '深水埗區', '富昌邨': '深水埗區', '西九龍中心': '深水埗區', '黃金電腦': '深水埗區', '布藝市場': '深水埗區', // NEW Landmark
-            // 九龍城區
-            '九龍城': '九龍城區', '紅磡': '九龍城區', '九龍塘': '九龍城區', '土瓜灣': '九龍城區', '何文田': '九龍城區', '啟德': '九龍城區', '啟晴邨': '九龍城區', '德朗邨': '九龍城區', '翔龍灣': '九龍城區', '愛民邨': '九龍城區', '黃埔': '九龍城區', '海逸豪園': '九龍城區', '又一城': '九龍城區', '浸大': '九龍城區', '理大': '九龍城區', '馬頭圍': '九龍城區', '馬頭角': '九龍城區', '九龍灣公園': '九龍城區', '蒲崗': '九龍城區', // NEW Road/Estate
-            // 黃大仙區
-            '黃大仙': '黃大仙區', '慈雲山': '黃大仙區', '樂富': '黃大仙區', '彩虹': '黃大仙區', '鑽石山': '黃大仙區', '新蒲崗': '黃大仙區', '竹園邨': '黃大仙區', '鳳凰新邨': '黃大仙區', '斧山': '黃大仙區', '龍翔道': '黃大仙區', '牛池灣': '黃大仙區', '東頭邨': '黃大仙區', '橫頭磡': '黃大仙區', '天馬苑': '黃大仙區', '彩雲邨': '黃大仙區', '坪石邨': '黃大仙區', '志蓮淨苑': '黃大仙區', '南蓮園池': '黃大仙區', '獅子山公園': '黃大仙區', // NEW Landmark
-            // 觀塘區
-            '觀塘': '觀塘區', '藍田': '觀塘區', '油塘': '觀塘區', '秀茂坪': '觀塘區', '順利': '觀塘區', '樂華': '觀塘區', '麗晶花園': '觀塘區', '啟業邨': '觀塘區', '順天邨': '觀塘區', '翠屏邨': '觀塘區', '鯉魚門': '觀塘區', '創紀之城': '觀塘區', '牛頭角': '觀塘區', '九龍灣': '觀塘區', '德福花園': '觀塘區', '淘大花園': '觀塘區', '曉麗苑': '觀塘區', '高俊苑': '觀塘區', '安達邨': '觀塘區', '安泰邨': '觀塘區', '東九文化中心': '觀塘區', '佐敦谷公園': '觀塘區', // NEW Landmark
-
-            /* 新界 (New Territories) */
-            // 葵青區
-            '葵青': '葵青區', '葵涌': '葵青區', '青衣': '葵青區', '荔景': '葵青區', '葵盛': '葵青區', '葵芳': '葵青區', '長安邨': '葵青區', '長康邨': '葵青區', '青衣邨': '葵青區', '長宏邨': '葵青區', '長發邨': '葵青區', '石籬': '葵青區', '大窩口': '葵青區', '貨櫃碼頭': '葵青區', '青衣橋': '葵青區', '青馬大橋': '葵青區', '美景花園': '葵青區', '青衣自然徑': '葵青區', // NEW Landmark
-            // 荃灣區
-            '荃灣': '荃灣區', '汀九': '荃灣區', '深井': '荃灣區', '馬灣': '荃灣區', '麗城花園': '荃灣區', '愉景新城': '荃灣區', '綠楊新邨': '荃灣區', '象山邨': '荃灣區', '福來邨': '荃灣區', '石圍角': '荃灣區', '海之戀': '荃灣區', '荃威': '荃灣區', '荃景圍': '荃灣區', '油柑頭': '荃灣區', '汀九橋': '荃灣區', '大帽山': '荃灣區', // NEW Landmark
-            // 屯門區
-            '屯門': '屯門區', '兆康': '屯門區', '蝴蝶灣': '屯門區', '大興': '屯門區', '友愛邨': '屯門區', '安定邨': '屯門區', '湖景邨': '屯門區', '屯門碼頭': '屯門區', '良景邨': '屯門區', '田景邨': '屯門區', '寶田': '屯門區', '山景邨': '屯門區', '三聖': '屯門區', '置樂': '屯門區', '黃金海岸': '屯門區', '小欖': '屯門區', '藍地': '屯門區', '大欖': '屯門區', '千島湖': '屯門區', // NEW Landmark
-            // 元朗區
-            '元朗': '元朗區', '天水圍': '元朗區', '錦田': '元朗區', '八鄉': '元朗區', '新田': '元朗區', '屏山': '元朗區', '橫洲': '元朗區', '朗屏邨': '元朗區', '天悅邨': '元朗區', '采葉庭': '元朗區', '洪水橋': '元朗區', '廈村': '元朗區', '流浮山': '元朗區', '加州': '元朗區', '錦綉': '元朗區', '大棠': '元朗區', '天耀邨': '元朗區', '天瑞邨': '元朗區',
-            // 北區
-            '北區': '北區', '上水': '北區', '粉嶺': '北區', '沙頭角': '北區', '打鼓嶺': '北區', '古洞': '北區', '華明邨': '北區', '嘉福邨': '北區', '清河邨': '北區', '祥華邨': '北區', '聯和墟': '北區', '蝴蝶山': '北區', '石湖墟': '北區', '軍地': '北區', '坪輋': '北區', '流水響': '北區', '鶴藪': '北區', // NEW Landmark
-            // 大埔區
-            '大埔': '大埔區', '大埔墟': '大埔區', '廣福': '大埔區', '白石角': '大埔區', '大美督': '大埔區', '科學園': '大埔區', '富善邨': '大埔區', '昌運中心': '大埔區', '大埔中心': '大埔區', '太和': '大埔區', '富亨邨': '大埔區', '運頭塘': '大埔區', '新峰花園': '大埔區', '吐露港': '大埔區',
-            // 沙田區
-            '沙田': '沙田區', '馬鞍山': '沙田區', '大圍': '沙田區', '火炭': '沙田區', '小瀝源': '沙田區', '城門河': '沙田區', '瀝源邨': '沙田區', '禾輋邨': '沙田區', '廣源邨': '沙田區', '博康邨': '沙田區', '新城市廣場': '沙田區', '沙田馬場': '沙田區', '威爾斯醫院': '沙田區', '愉翠苑': '沙田區', '秦石邨': '沙田區', '穗禾苑': '沙田區', '碩門邨': '沙田區', '烏溪沙': '沙田區', '恆安': '沙田區', '顯徑': '沙田區',
-            // 西貢區
-            '西貢': '西貢區', '將軍澳': '西貢區', '坑口': '西貢區', '調景嶺': '西貢區', '寶琳': '西貢區', '尚德': '西貢區', '日出康城': '西貢區', '翠林邨': '西貢區', '景林邨': '西貢區', '健明邨': '西貢區', '西貢碼頭': '西貢區', '蠔涌': '西貢區', '清水灣': '西貢區', '科大': '西貢區', '寶林邨': '西貢區', '厚德邨': '西貢區', '茵怡': '西貢區', '佛堂門': '西貢區', '大廟灣': '西貢區', // NEW Landmark
-
-            /* 離島 (Islands) */
-            // 離島區
-            '離島': '離島區', '東涌': '離島區', '大嶼山': '離島區', '長洲': '離島區', '南丫島': '離島區', '愉景灣': '離島區', '坪洲': '離島區', '梅窩': '離島區', '大澳': '離島區', '赤鱲角': '離島區', '機場': '離島區', '逸東邨': '離島區', '昂坪': '離島區', '欣澳': '離島區', '榕樹灣': '離島區', '索罟灣': '離島區', '貝澳': '離島區', '塘福': '離島區', '迪士尼': '離島區',
+            '中西': '中西區', '中環': '中西區', '半山': '中西區', '西營盤': '中西區', '上環': '中西區', '堅尼地城': '中西區', '西環': '中西區', '金鐘': '中西區', '般咸道': '中西區', '山頂': '中西區', '太平山': '中西區', '石塘咀': '中西區', '薄扶林道': '中西區', '堅尼': '中西區', '國際金融中心': '中西區', '皇后大道': '中西區', '德輔道': '中西區', '荷李活道': '中西區', '摩星嶺': '中西區', '維多利亞城': '中西區', '灣仔': '灣仔區', '銅鑼灣': '灣仔區', '跑馬地': '灣仔區', '大坑': '灣仔區', '掃桿埔': '灣仔區', '禮頓山': '灣仔區', '天后': '灣仔區', '勵德邨': '灣仔區', '崇光': '灣仔區', '會展': '灣仔區', '鵝頸': '灣仔區', '利園': '灣仔區', '維多利亞公園': '灣仔區', '銅鑼灣道': '灣仔區', '石水渠街': '灣仔區', '東區': '東區', '北角': '東區', '鰂魚涌': '東區', '筲箕灣': '東區', '柴灣': '東區', '西灣河': '東區', '杏花邨': '東區', '小西灣': '東區', '康怡花園': '東區', '康山花園': '東區', '太古城': '東區', '炮台山': '東區', '藍灣半島': '東區', '興華邨': '東區', '漁灣邨': '東區', '環翠邨': '東區', '城市花園': '東區', '和富中心': '東區', '太古坊': '東區', '南區': '南區', '黃竹坑': '南區', '大口環': '南區', '薄扶林': '南區', '置富': '南區', '華富': '南區', '華貴': '南區', '香港仔': '南區', '田灣': '南區', '貝沙灣': '南區', '數碼港': '南區', '淺水灣': '南區', '赤柱': '南區', '大潭': '南區', '利東邨': '南區', '海怡半島': '南區', '鴨脷洲': '南區', '深水灣': '南區', '石澳': '南區', '壽臣山': '南區', '海洋公園': '南區', '鴨脷': '南區', '美利樓': '南區', '油尖旺': '油尖旺區', '旺角': '油尖旺區', '油麻地': '油尖旺區', '尖沙咀': '油尖旺區', '大角咀': '油尖旺區', '佐敦': '油尖旺區', '奧運': '油尖旺區', '富榮花園': '油尖旺區', '海富苑': '油尖旺區', '廣東道': '油尖旺區', '圓方': '油尖旺區', '西九龍站': '油尖旺區', '彌敦道': '油尖旺區', '太子': '油尖旺區', '窩打老道': '油尖旺區', '中港城': '油尖旺區', '朗豪坊': '油尖旺區', '雅蘭': '油尖旺區', '歷史博物館': '油尖旺區', '深水': '深水埗區', '長沙灣': '深水埗區', '石硤尾': '深水埗區', '荔枝角': '深水埗區', '美孚': '深水埗區', '南山邨': '深水埗區', '蘇屋邨': '深水埗區', '白田邨': '深水埗區', '麗閣邨': '深水埗區', '欽州街': '深水埗區', '又一村': '深水埗區', '李鄭屋': '深水埗區', '元州邨': '深水埗區', '富昌邨': '深水埗區', '西九龍中心': '深水埗區', '黃金電腦': '深水埗區', '布藝市場': '深水埗區', '九龍城': '九龍城區', '紅磡': '九龍城區', '九龍塘': '九龍城區', '土瓜灣': '九龍城區', '何文田': '九龍城區', '啟德': '九龍城區', '啟晴邨': '九龍城區', '德朗邨': '九龍城區', '翔龍灣': '九龍城區', '愛民邨': '九龍城區', '黃埔': '九龍城區', '海逸豪園': '九龍城區', '又一城': '九龍城區', '浸大': '九龍城區', '理大': '九龍城區', '馬頭圍': '九龍城區', '馬頭角': '九龍城區', '九龍灣公園': '九龍城區', '蒲崗': '九龍城區', '黃大仙': '黃大仙區', '慈雲山': '黃大仙區', '樂富': '黃大仙區', '彩虹': '彩虹邨', '鑽石山': '黃大仙區', '新蒲崗': '黃大仙區', '竹園邨': '黃大仙區', '鳳凰新邨': '黃大仙區', '斧山': '黃大仙區', '龍翔道': '黃大仙區', '牛池灣': '黃大仙區', '東頭邨': '黃大仙區', '橫頭磡': '黃大仙區', '天馬苑': '黃大仙區', '彩雲邨': '黃大仙區', '坪石邨': '黃大仙區', '志蓮淨苑': '黃大仙區', '南蓮園池': '黃大仙區', '獅子山公園': '黃大仙區', '觀塘': '觀塘區', '藍田': '觀塘區', '油塘': '觀塘區', '秀茂坪': '觀塘區', '順利': '順利邨', '樂華': '觀塘區', '麗晶花園': '觀塘區', '啟業邨': '觀塘區', '順天邨': '觀塘區', '翠屏邨': '觀塘區', '鯉魚門': '觀塘區', '創紀之城': '觀塘區', '牛頭角': '觀塘區', '九龍灣': '觀塘區', '德福花園': '觀塘區', '淘大花園': '觀塘區', '曉麗苑': '觀塘區', '高俊苑': '觀塘區', '安達邨': '觀塘區', '安泰邨': '觀塘區', '東九文化中心': '觀塘區', '佐敦谷公園': '觀塘區', '葵青': '葵青區', '葵涌': '葵青區', '青衣': '葵青區', '荔景': '葵青區', '葵盛': '葵青區', '葵芳': '葵青區', '長安邨': '葵青區', '長康邨': '葵青區', '青衣邨': '葵青區', '長宏邨': '葵青區', '長發邨': '葵青區', '石籬': '葵青區', '大窩口': '葵青區', '貨櫃碼頭': '葵青區', '青衣橋': '葵青區', '青馬大橋': '葵青區', '美景花園': '葵青區', '青衣自然徑': '葵青區', '荃灣': '荃灣區', '汀九': '荃灣區', '深井': '荃灣區', '馬灣': '荃灣區', '麗城花園': '荃灣區', '愉景新城': '荃灣區', '綠楊新邨': '荃灣區', '象山邨': '荃灣區', '福來邨': '荃灣區', '石圍角': '荃灣區', '海之戀': '荃灣區', '荃威': '荃灣區', '荃景圍': '荃灣區', '油柑頭': '荃灣區', '汀九橋': '荃灣區', '大帽山': '荃灣區', '屯門': '屯門區', '兆康': '屯門區', '蝴蝶灣': '屯門區', '大興': '屯門區', '友愛邨': '屯門區', '安定邨': '屯門區', '湖景邨': '屯門區', '屯門碼頭': '屯門區', '良景邨': '屯門區', '田景邨': '屯門區', '寶田': '屯門區', '山景邨': '屯門區', '三聖': '屯門區', '置樂': '屯門區', '黃金海岸': '屯門區', '小欖': '屯門區', '藍地': '屯門區', '大欖': '屯門區', '千島湖': '屯門區', '元朗': '元朗區', '天水圍': '元朗區', '錦田': '元朗區', '八鄉': '元朗區', '新田': '元朗區', '屏山': '元朗區', '橫洲': '元朗區', '朗屏邨': '元朗區', '天悅邨': '元朗區', '采葉庭': '元朗區', '洪水橋': '元朗區', '廈村': '元朗區', '流浮山': '元朗區', '加州': '元朗區', '錦綉': '元朗區', '大棠': '元朗區', '天耀邨': '元朗區', '天瑞邨': '元朗區', '北區': '北區', '上水': '北區', '粉嶺': '北區', '沙頭角': '北區', '打鼓嶺': '北區', '古洞': '北區', '華明邨': '北區', '嘉福邨': '北區', '清河邨': '北區', '祥華邨': '北區', '聯和墟': '北區', '蝴蝶山': '北區', '石湖墟': '北區', '軍地': '北區', '坪輋': '北區', '流水響': '北區', '鶴藪': '北區', '大埔': '大埔區', '大埔墟': '大埔區', '廣福': '大埔區', '白石角': '大埔區', '大美督': '大埔區', '科學園': '大埔區', '富善邨': '大埔區', '昌運中心': '大埔區', '大埔中心': '大埔區', '太和': '大埔區', '富亨邨': '大埔區', '運頭塘': '大埔區', '新峰花園': '大埔區', '吐露港': '大埔區', '沙田': '沙田區', '馬鞍山': '沙田區', '大圍': '沙田區', '火炭': '沙田區', '小瀝源': '沙田區', '城門河': '沙田區', '瀝源邨': '沙田區', '禾輋邨': '沙田區', '廣源邨': '沙田區', '博康邨': '沙田區', '新城市廣場': '沙田區', '沙田馬場': '沙田區', '威爾斯醫院': '沙田區', '愉翠苑': '沙田區', '秦石邨': '沙田區', '穗禾苑': '沙田區', '碩門邨': '沙田區', '烏溪沙': '沙田區', '恆安': '沙田區', '顯徑': '沙田區', '西貢': '西貢區', '將軍澳': '西貢區', '坑口': '西貢區', '調景嶺': '西貢區', '寶琳': '西貢區', '尚德': '西貢區', '日出康城': '西貢區', '翠林邨': '西貢區', '景林邨': '西貢區', '健明邨': '西貢區', '西貢碼頭': '西貢區', '蠔涌': '西貢區', '清水灣': '西貢區', '科大': '西貢區', '寶林邨': '西貢區', '厚德邨': '西貢區', '茵怡': '西貢區', '佛堂門': '西貢區', '大廟灣': '西貢區', '離島': '離島區', '東涌': '離島區', '大嶼山': '離島區', '長洲': '離島區', '南丫島': '離島區', '愉景灣': '離島區', '坪洲': '離島區', '梅窩': '離島區', '大澳': '離島區', '赤鱲角': '離島區', '機場': '離島區', '逸東邨': '離島區', '昂坪': '離島區', '欣澳': '離島區', '榕樹灣': '離島區', '索罟灣': '離島區', '貝澳': '離島區', '塘福': '離島區', '迪士尼': '離島區',
         };
         const SOURCES = [
-            { id: 'list-hk01', site: 'hk01.com', querySuffix: '' },
-            { id: 'list-oncc', site: 'on.cc', querySuffix: '' },
-            { id: 'list-singtao', site: 'stheadline.com', querySuffix: '突發' } 
+            { id: 'list-hk01', site: 'hk01.com', name: 'HK01', querySuffix: '' },
+            { id: 'list-oncc', site: 'on.cc', name: '東網 (On.cc)', querySuffix: '' },
+            { id: 'list-singtao', site: 'stheadline.com', name: '星島日報', querySuffix: '突發' } 
         ];
-
+        const STATUS_OPTIONS = {
+            'death': '🔴 自殺身亡',
+            'attempt': '🟢 企圖自殺',
+            'ambiguous': '🟠 待定/模糊'
+        };
+        const REGION_OPTIONS = {
+            '港島': '港島 (中西/灣仔/東區/南區)',
+            '九龍': '九龍 (油尖旺/深水埗/九龍城/黃大仙/觀塘)',
+            '新界': '新界 (葵青/荃灣/屯門/元朗/北區/大埔/沙田/西貢)',
+            '離島': '離島'
+        };
 
         // -----------------------------------------------------
-        // 核心 UX 函數
+        // UX/UI 函數 (保持不變)
         // -----------------------------------------------------
-
         function updateDateTime() {
+            // ... (保持不變) ...
             const now = new Date();
-            const dateOptions = { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short' };
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const dateStr = now.toLocaleDateString('zh-HK', { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short' });
+            const timeStr = now.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             
-            const dateStr = now.toLocaleDateString('zh-HK', dateOptions);
-            const timeStr = now.toLocaleTimeString('zh-HK', timeOptions);
-
             const dateTimeElement = document.getElementById('current-date-time');
             if (dateTimeElement) {
-                dateTimeElement.textContent = `${dateStr} ${timeStr}`;
+                const button = dateTimeElement.querySelector('#mode-toggle');
+                dateTimeElement.innerHTML = `${dateStr} ${timeStr}`;
+                dateTimeElement.appendChild(button);
             }
         }
         
-        function updateControlIndicators() {
-            const statusFilter = document.getElementById('status-filter');
-            const sortOrder = document.getElementById('sort-order');
-            const keywordSearch = document.getElementById('keyword-search');
-
-            statusFilter.classList.toggle('active-control', statusFilter.value !== 'all');
-            sortOrder.classList.toggle('active-control', sortOrder.value !== 'newest');
-            keywordSearch.classList.toggle('active-control', keywordSearch.value.trim() !== '');
+        function getSuicideStatusHtml(status) {
+            if (status === 'death') return '<span class="status-tag tag-death">🔴 自殺身亡</span>';
+            if (status === 'attempt') return '<span class="status-tag tag-attempt">🟢 企圖自殺</span>';
+            return '<span class="status-tag tag-ambiguous">🟠 待定/模糊</span>';
         }
 
-        function resetFilters() {
-            document.getElementById('status-filter').value = 'all';
-            document.getElementById('sort-order').value = 'newest';
-            document.getElementById('keyword-search').value = '';
+        function getDistrictTag(title) { 
+            const sortedKeys = Object.keys(DISTRICT_MAP).sort((a, b) => b.length - a.length);
+            let districtName = '地區不明';
+
+            for (const shortName of sortedKeys) {
+                if (title.includes(shortName)) {
+                    districtName = DISTRICT_MAP[shortName];
+                    break;
+                }
+            }
             
-            setupSearchClear(); 
-            renderAllColumns();
-        }
-
-        function setupSearchClear() {
-            const searchInput = document.getElementById('keyword-search');
-            const clearButton = document.getElementById('clear-search-btn');
-
-            function toggleClearButton() {
-                clearButton.classList.toggle('visible', searchInput.value.length > 0);
-            }
-
-            clearButton.onclick = () => {
-                searchInput.value = '';
-                toggleClearButton();
-                renderAllColumns(); 
-            };
-
-            searchInput.oninput = () => {
-                toggleClearButton();
-            };
-
-            toggleClearButton();
-        }
-        
-        function setupBackToTop() {
-            const backToTopBtn = document.getElementById('back-to-top-btn');
-            const scrollThreshold = 300; 
-
-            window.onscroll = () => {
-                const isVisible = document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold;
-                backToTopBtn.classList.toggle('visible', isVisible);
-            };
-
-            backToTopBtn.onclick = () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+            let region = '未知';
+            if (['中西區', '灣仔區', '東區', '南區'].includes(districtName)) region = '港島';
+            else if (['油尖旺區', '深水埗區', '九龍城區', '黃大仙區', '觀塘區'].includes(districtName)) region = '九龍';
+            else if (['葵青區', '荃灣區', '屯門區', '元朗區', '北區', '大埔區', '沙田區', '西貢區'].includes(districtName)) region = '新界';
+            else if (districtName === '離島區') region = '離島';
+            
+            // 使用 class="status-tag tag-district" 來應用背景色
+            return {
+                html: `<span class="status-tag tag-district" data-region="${region}">${districtName}</span>`,
+                region: region,
+                district: districtName
             };
         }
 
-        function setupLinkPreload() {
-            document.querySelectorAll('.news-item').forEach(item => {
-                const linkUrl = item.href;
-                if (!linkUrl) return;
+        function populateDistrictFilter(data) {
+            const select = document.getElementById('district-filter');
+            const allItems = Object.values(data).flat();
+            const uniqueDistricts = [...new Set(Object.values(DISTRICT_MAP))].sort();
+            
+            const districtCounts = allItems.reduce((acc, item) => {
+                const { district } = getDistrictTag(item.title);
+                acc[district] = (acc[district] || 0) + 1;
+                return acc;
+            }, {});
+            
+            const regionCounts = { '港島': 0, '九龍': 0, '新界': 0, '離島': 0 };
+            allItems.forEach(item => {
+                const { region } = getDistrictTag(item.title);
+                if (regionCounts.hasOwnProperty(region)) {
+                    regionCounts[region] += 1;
+                }
+            });
 
-                item.addEventListener('mouseover', () => {
-                    const link = document.createElement('link');
-                    link.rel = 'prefetch';
-                    link.href = linkUrl;
-                    document.head.appendChild(link);
-                    
-                    setTimeout(() => link.remove(), 60000); 
-                }, { once: true }); 
+            // 1. 更新大區選項的數量
+            select.querySelector('option[value="港島"]').textContent = `港島 (${regionCounts['港島']})`;
+            select.querySelector('option[value="九龍"]').textContent = `九龍 (${regionCounts['九龍']})`;
+            select.querySelector('option[value="新界"]').textContent = `新界 (${regionCounts['新界']})`;
+            select.querySelector('option[value="離島"]').textContent = `離島 (${regionCounts['離島']})`;
+
+
+            // 2. 移除所有單個地區選項
+            const existingOptions = select.querySelectorAll('option[value]:not([value="all"]):not([value="港島"]):not([value="九龍"]):not([value="新界"]):not([value="離島"])');
+            existingOptions.forEach(opt => opt.remove());
+
+            // 3. 添加新的單個地區選項 (帶有數量)
+            const lastRegionOption = select.querySelector('option[value="離島"]');
+            
+            uniqueDistricts.forEach(district => {
+                const count = districtCounts[district] || 0;
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = `${district} (${count})`;
+                if (lastRegionOption) {
+                    lastRegionOption.parentNode.insertBefore(option, lastRegionOption.nextSibling);
+                } else {
+                    select.appendChild(option);
+                }
             });
         }
 
 
         // -----------------------------------------------------
-        // 輔助函數
+        // 💾 本地緩存功能 (保持不變)
         // -----------------------------------------------------
-        function formatRelativeTime(dateString) {
+        function loadCache() {
+            try {
+                const cachedData = localStorage.getItem(CACHE_KEY);
+                const cachedTimestampStr = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+                
+                if (cachedData && cachedTimestampStr) {
+                    ALL_NEWS_DATA = JSON.parse(cachedData);
+                    
+                    for (const key in ALL_NEWS_DATA) {
+                        if (Array.isArray(ALL_NEWS_DATA[key])) {
+                            ALL_NEWS_DATA[key] = ALL_NEWS_DATA[key].map(item => ({
+                                ...item,
+                                _date: new Date(item._date)
+                            }));
+                        }
+                    }
+                    
+                    LAST_UPDATE_TIMESTAMP = new Date(cachedTimestampStr);
+
+                    const timeAgo = formatRelativeTime(cachedTimestampStr);
+                    const date = LAST_UPDATE_TIMESTAMP;
+                    
+                    const statusEl = document.getElementById('cache-status');
+                    statusEl.className = 'cache-warning';
+                    statusEl.innerHTML = `⚠️ 數據來自本地緩存。上次成功更新：${timeAgo} (${date.toLocaleTimeString('zh-HK')})。`;
+                    
+                    document.getElementById('last-update').textContent = `數據更新於：本地緩存 (上次成功時間：${date.toLocaleDateString('zh-HK')} ${date.toLocaleTimeString('zh-HK')})`;
+
+                    console.log('Loaded data from local cache.');
+                    return true;
+                }
+            } catch (e) {
+                console.error("Error loading cache:", e);
+                localStorage.removeItem(CACHE_KEY);
+                localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+            }
+            return false;
+        }
+
+        function saveCache(data) {
+            try {
+                const now = new Date();
+                localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                localStorage.setItem(CACHE_TIMESTAMP_KEY, now.toISOString());
+                LAST_UPDATE_TIMESTAMP = now; 
+                const statusEl = document.getElementById('cache-status');
+                if (statusEl) statusEl.innerHTML = ''; 
+            } catch (e) {
+                console.error("Error saving cache:", e);
+            }
+        }
+
+
+        // -----------------------------------------------------
+        // 核心數據處理與渲染
+        // -----------------------------------------------------
+        function formatRelativeTime(dateString) { 
             const date = new Date(dateString);
             const now = new Date();
             const diffInSeconds = Math.floor((now - date) / 1000);
@@ -644,83 +761,197 @@
             return "幾秒前";
         }
 
+        async function fetchNewsForSource(sourceObj) {
+            const fullQuery = `site:${sourceObj.site} ${sourceObj.querySuffix} ${BASE_KEYWORDS}`;
+            const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(fullQuery)}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`;
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`;
+            
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.status !== 'ok') throw new Error('API Error');
+
+                let items = data.items.filter(item => {
+                    const title = item.title;
+                    
+                    const hasSuicideKW = SUICIDE_KEYWORDS.some(k => title.includes(k));
+                    if (!hasSuicideKW) return false; 
+
+                    const hasExcludeKW = EXCLUDE_WORDS.some(w => title.includes(w));
+                    if (hasExcludeKW) return false;
+
+                    return true;
+                });
+
+                items = items.map(item => ({
+                    ...item,
+                    _status: getSuicideStatusString(item.title),
+                    _date: new Date(item.pubDate).toISOString() 
+                }));
+                
+                return items;
+
+            } catch (error) {
+                console.error(`Error fetching news for ${sourceObj.site}:`, error);
+                return 'ERROR'; 
+            }
+        }
+
         function getSuicideStatusString(title) {
             const text = title;
             if (DEATH_KEYWORDS.some(k => text.includes(k))) return 'death';
             if (ATTEMPT_KEYWORDS.some(k => text.includes(k))) return 'attempt';
             return 'ambiguous';
         }
-
-        function getSuicideStatusHtml(status) {
-            if (status === 'death') return '<span class="status-tag tag-death">🔴 自殺身亡</span>';
-            if (status === 'attempt') return '<span class="status-tag tag-attempt">🟢 企圖自殺</span>';
-            return '<span class="status-tag tag-ambiguous">🟠 待定/模糊</span>';
-        }
         
-        // ⚠️ 地區判斷函數
-        function getDistrictTag(title) { 
-            const text = title;
-            // 按長度排序，確保準確的名稱優先被匹配 (例如「石硤尾」優先於「石硤」)
-            const sortedKeys = Object.keys(DISTRICT_MAP).sort((a, b) => b.length - a.length);
+        async function fetchAllNewsAndCache() {
+            const fetchPromises = SOURCES.map(source => fetchNewsForSource(source));
+            const results = await Promise.all(fetchPromises);
 
-            for (const shortName of sortedKeys) {
-                if (text.includes(shortName)) {
-                    const districtName = DISTRICT_MAP[shortName];
-                    return `<span class="status-tag tag-district">${districtName}</span>`;
+            let allSuccessful = true;
+            let newData = {};
+
+            SOURCES.forEach((source, index) => {
+                const result = results[index];
+                if (result === 'ERROR') {
+                    allSuccessful = false;
+                    newData[source.id] = 'ERROR'; 
+                } else {
+                    newData[source.id] = result.map(item => ({
+                        ...item,
+                        _date: new Date(item._date) 
+                    }));
                 }
-            }
-            return '<span class="status-tag tag-district tag-unknown">地區不明</span>';
-        }
-
-        function renderSkeletonScreen(containerId, count = 5) {
-            const container = document.getElementById(containerId);
-            let html = '';
-            for (let i = 0; i < count; i++) {
-                html += `
-                    <div class="skeleton-item">
-                        <div class="skeleton-line short"></div>
-                        <div class="skeleton-line long"></div>
-                        <div class="skeleton-line medium"></div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        }
-
-        function renderNewsList(containerId, items) {
-            const container = document.getElementById(containerId);
-            
-            if (!items || items.length === 0) {
-                container.innerHTML = `<div class="empty">過去 7 日無相關報導</div>`;
-                return;
-            }
-
-            let html = '<div class="news-list-content">'; // 使用一個新的 div 包裹
-            items.forEach(item => {
-                const dateObj = new Date(item.pubDate);
-                const dateStr = `${dateObj.getFullYear()}/${(dateObj.getMonth()+1).toString().padStart(2, '0')}/${dateObj.getDate().toString().padStart(2, '0')} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
-                
-                const relativeTime = formatRelativeTime(item.pubDate);
-                const statusTagHtml = getSuicideStatusHtml(item._status);
-                const districtTagHtml = getDistrictTag(item.title);
-
-                html += `
-                    <a href="${item.link}" target="_blank" class="news-item">
-                        <div class="news-date">
-                            <span>發佈時間：</span>${relativeTime} 
-                            <span class="absolute-time">(${dateStr})</span>
-                            ${statusTagHtml}
-                            ${districtTagHtml}
-                        </div>
-                        <div class="news-title">${item.title}</div>
-                    </a>
-                `;
             });
-            html += '</div>';
-            container.innerHTML = html;
+
+            if (allSuccessful) {
+                ALL_NEWS_DATA = newData;
+                const savableData = {};
+                for (const key in newData) {
+                    savableData[key] = newData[key].map(item => ({
+                        ...item,
+                        _date: item._date.toISOString() 
+                    }));
+                }
+                saveCache(savableData); 
+
+                const now = new Date();
+                document.getElementById('last-update').textContent = `數據更新於：${now.toLocaleDateString('zh-HK')} ${now.toLocaleTimeString('zh-HK')}`;
+                // 觸發內容淡入
+                document.querySelectorAll('.news-list-content').forEach(el => el.classList.add('fade-in'));
+                return true;
+            } else {
+                console.warn("One or more API fetches failed. Attempting to load cache...");
+                return false; 
+            }
         }
 
-        // 引入了 Debounce 函數，以優化搜索和篩選的性能
+        function applyFilterFlash(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.classList.remove('flash-active');
+                void el.offsetWidth; 
+                el.classList.add('flash-active');
+                setTimeout(() => el.classList.remove('flash-active'), 400);
+            }
+        }
+
+        function updateSummaryAndCounts(totalCount) {
+            const sf = document.getElementById('status-filter');
+            const df = document.getElementById('district-filter');
+            const so = document.getElementById('sort-order');
+            const ks = document.getElementById('keyword-search');
+            const summaryEl = document.getElementById('active-filters-summary');
+            const summaryParts = [];
+
+            // 狀態
+            if (sf.value !== 'all') {
+                summaryParts.push(`狀態為 <b>${STATUS_OPTIONS[sf.value]}</b>`);
+            }
+            // 地區
+            if (df.value !== 'all') {
+                let districtText = REGION_OPTIONS[df.value] || df.options[df.selectedIndex].text.replace(/\s*\(\d+\)$/, '');
+                summaryParts.push(`地區為 <b>${districtText}</b>`);
+            }
+            // 關鍵詞
+            if (ks.value.trim() !== '') {
+                summaryParts.push(`包含關鍵詞 <b>"${ks.value.trim()}"</b>`);
+            }
+            // 排序 (只有非默認才顯示)
+            if (so.value !== 'newest') {
+                summaryParts.push(`按 <b>${so.options[so.selectedIndex].text}</b> 排序`);
+            }
+
+            if (summaryParts.length === 0) {
+                summaryEl.textContent = '未啟用篩選器。正在顯示所有數據。';
+                summaryEl.classList.remove('visible');
+            } else {
+                let summaryText = summaryParts.join(' 且 ');
+                summaryEl.innerHTML = `正在顯示共 <b>${totalCount} 則</b>，${summaryText} 的新聞。`;
+                summaryEl.classList.add('visible');
+            }
+        }
+
+
+        function renderAllColumns(event) {
+            let totalFilteredCount = 0;
+            const statusFilter = document.getElementById('status-filter').value;
+            const districtFilter = document.getElementById('district-filter').value; 
+            const sortOrder = document.getElementById('sort-order').value;
+            const keyword = document.getElementById('keyword-search').value.toLowerCase(); 
+
+            if (event && event.target && event.target.id !== 'keyword-search' && event.target.id !== 'reset-filters-btn') {
+                applyFilterFlash(event.target.id);
+            }
+            
+            updateControlIndicators(); 
+
+            SOURCES.forEach(source => {
+                const rawItems = ALL_NEWS_DATA[source.id];
+                const headerEl = document.getElementById(`header-${source.id}`);
+                
+                if (rawItems === 'ERROR' || !rawItems || rawItems.length === 0) {
+                    document.getElementById(source.id).innerHTML = `<div class="empty">數據載入失敗${rawItems === 'ERROR' ? ' (API繁忙)' : ''}或無數據。</div>`;
+                    if (headerEl) headerEl.querySelector('.count').textContent = '0';
+                    return;
+                }
+
+                let filteredItems = rawItems.filter(item => {
+                    const title = item.title.toLowerCase();
+                    const itemStatus = item._status;
+                    const { region, district } = getDistrictTag(item.title);
+                    
+                    if (keyword && !title.includes(keyword)) return false;
+
+                    if (statusFilter !== 'all' && itemStatus !== statusFilter) return false;
+
+                    if (districtFilter !== 'all') {
+                        if (['港島', '九龍', '新界', '離島'].includes(districtFilter)) {
+                            if (region !== districtFilter) return false;
+                        } else if (districtFilter !== district) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+
+                if (headerEl) {
+                    headerEl.querySelector('.count').textContent = filteredItems.length;
+                    totalFilteredCount += filteredItems.length;
+                }
+
+                filteredItems.sort((a, b) => {
+                    return sortOrder === 'newest' ? b._date - a._date : a._date - b._date; 
+                });
+
+                renderNewsList(source.id, filteredItems, keyword);
+            });
+            
+            updateSummaryAndCounts(totalFilteredCount);
+        }
+
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -733,86 +964,108 @@
             };
         }
 
-
-        async function fetchNewsForSource(sourceObj) {
-            // 構建 Google RSS URL
-            const fullQuery = `site:${sourceObj.site} ${sourceObj.querySuffix} ${BASE_KEYWORDS}`;
-            const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(fullQuery)}&hl=zh-HK&gl=HK&ceid=HK:zh-Hant`;
-            // 使用 rss2json 代理
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`;
+        function renderNewsList(containerId, items, keyword) { 
+            const container = document.getElementById(containerId);
             
-            try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-
-                if (data.status !== 'ok') throw new Error('API Error');
-
-                let items = data.items.filter(item => {
-                    const title = item.title;
-                    
-                    // A. 必須包含自殺/自殘關鍵詞 (強制檢查 - 確保結果高度相關)
-                    const hasSuicideKW = SUICIDE_KEYWORDS.some(k => title.includes(k));
-                    if (!hasSuicideKW) return false; 
-
-                    // B. 排除無關詞
-                    const hasExcludeKW = EXCLUDE_WORDS.some(w => title.includes(w));
-                    if (hasExcludeKW) return false;
-
-                    return true;
-                });
-
-                items = items.map(item => ({
-                    ...item,
-                    _status: getSuicideStatusString(item.title),
-                    _date: new Date(item.pubDate) // 轉換為 Date 對象用於排序
-                }));
-                
-                return items;
-
-            } catch (error) {
-                console.error(`Error fetching news for ${sourceObj.site}:`, error);
-                return 'ERROR'; 
+            if (!items || items.length === 0) {
+                container.innerHTML = `<div class="empty">在當前篩選條件下，無相關報導</div>`;
+                container.classList.remove('fade-in'); 
+                return;
             }
-        }
-        
-        function renderAllColumns() {
-            const statusFilter = document.getElementById('status-filter').value;
-            const sortOrder = document.getElementById('sort-order').value;
-            const keyword = document.getElementById('keyword-search').value.toLowerCase(); 
+
+            const keywordRegex = keyword ? new RegExp(`(${keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi') : null;
             
-            updateControlIndicators(); 
-
-            SOURCES.forEach(source => {
-                const rawItems = ALL_NEWS_DATA[source.id];
+            let html = '<div class="news-list-content">'; 
+            items.forEach(item => {
+                const dateObj = item._date; 
+                const pubDateStr = item.pubDate; 
+                const dateStr = `${dateObj.getFullYear()}/${(dateObj.getMonth()+1).toString().padStart(2, '0')}/${dateObj.getDate().toString().padStart(2, '0')} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
                 
-                if (rawItems === 'ERROR') {
-                    document.getElementById(source.id).innerHTML = '<div class="error">數據載入失敗 (API繁忙或網絡錯誤)。<br>請稍後重試。</div>';
-                    return;
-                }
+                const relativeTime = formatRelativeTime(pubDateStr);
+                const statusTagHtml = getSuicideStatusHtml(item._status);
+                const districtTag = getDistrictTag(item.title);
                 
-                if (!rawItems) return; // 尚未載入
+                const isNew = LAST_UPDATE_TIMESTAMP && dateObj > LAST_UPDATE_TIMESTAMP;
+                // 注意：tag-new 已經有 background-color: var(--tag-new-bg) 的定義
+                const newTagHtml = isNew ? '<span class="status-tag tag-new">🆕 新</span>' : '';
 
-                // 1. 關鍵詞過濾
-                let filteredItems = rawItems.filter(item => {
-                    return item.title.toLowerCase().includes(keyword.toLowerCase());
-                });
-
-                // 2. 狀態過濾
-                let filterValue = statusFilter; 
-
-                if (filterValue !== 'all') {
-                    filteredItems = filteredItems.filter(item => item._status === filterValue);
+                let titleHtml = item.title;
+                if (keywordRegex) {
+                    titleHtml = item.title.replace(keywordRegex, '<span class="highlight-term">$1</span>');
                 }
 
-                // 3. 排序
-                let sortedItems = filteredItems.sort((a, b) => {
-                    return sortOrder === 'newest' ? b._date - a._date : a._date - b._date; 
-                });
+                html += `
+                    <a href="${item.link}" target="_blank" class="news-item">
+                        <div class="news-date">
+                            <span>發佈時間：</span>${relativeTime} 
+                            <span class="absolute-time">(${dateStr})</span>
+                            ${newTagHtml}
+                            ${statusTagHtml}
+                            ${districtTag.html}
+                        </div>
+                        <div class="news-title">${titleHtml}</div>
+                    </a>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+            
+            container.querySelector('.news-list-content').classList.add('fade-in');
+        }
 
-                renderNewsList(source.id, sortedItems);
+        function updateControlIndicators() { 
+            const sf = document.getElementById('status-filter');
+            const df = document.getElementById('district-filter');
+            const so = document.getElementById('sort-order');
+            const ks = document.getElementById('keyword-search');
+            sf.classList.toggle('active-control', sf.value !== 'all');
+            df.classList.toggle('active-control', df.value !== 'all');
+            so.classList.toggle('active-control', so.value !== 'newest');
+            ks.classList.toggle('active-control', ks.value.trim() !== '');
+        }
+
+        function resetFilters() { 
+            document.getElementById('status-filter').value = 'all';
+            document.getElementById('district-filter').value = 'all';
+            document.getElementById('sort-order').value = 'newest';
+            document.getElementById('keyword-search').value = '';
+            
+            setupSearchClear(); 
+            renderAllColumns();
+            applyFilterFlash('reset-filters-btn');
+        }
+
+        function setupControlsToggle() {
+            const toggleBtn = document.getElementById('controls-toggle-btn');
+            const controlsArea = document.getElementById('controls-area');
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            
+            if (isMobile) {
+                controlsArea.classList.add('collapsed');
+                toggleBtn.textContent = '🔽 展開篩選與搜索';
+            } else {
+                controlsArea.classList.remove('collapsed');
+                toggleBtn.style.display = 'none';
+            }
+
+            toggleBtn.addEventListener('click', () => {
+                const isCollapsed = controlsArea.classList.toggle('collapsed');
+                toggleBtn.textContent = isCollapsed ? '🔽 展開篩選與搜索' : '△ 收合篩選與搜索';
             });
             
-            setupLinkPreload();
+            window.addEventListener('resize', () => {
+                const newIsMobile = window.matchMedia("(max-width: 768px)").matches;
+                if (!newIsMobile) {
+                    controlsArea.classList.remove('collapsed');
+                    toggleBtn.style.display = 'none';
+                } else {
+                    toggleBtn.style.display = 'block';
+                    if (!controlsArea.classList.contains('collapsed')) {
+                        controlsArea.classList.add('collapsed');
+                        toggleBtn.textContent = '🔽 展開篩選與搜索';
+                    }
+                }
+            });
         }
 
 
@@ -820,50 +1073,108 @@
         // 🚀 初始化函式 
         // -----------------------------------------------------
         async function init() {
-            // 設置虛擬天氣數據 (不實際呼叫天氣 API)
+            setupDarkModeToggle();
+            setupControlsToggle();
+            
             const weatherElement = document.getElementById('current-weather');
             if (weatherElement) {
-                weatherElement.innerHTML = '晴朗 ☀️ 24°C (濕度 45%)<br><span style="font-size: 0.8em; font-weight: 500; color: #95a5a6;">(天氣數據為快照)</span>';
+                weatherElement.innerHTML = '晴朗 ☀️ 24°C (數據快照)';
             }
-            
-            // 設置時間更新
             updateDateTime();
             setInterval(updateDateTime, 1000); 
+
+            const cacheLoaded = loadCache();
             
-            // 顯示骨架屏
             SOURCES.forEach(source => renderSkeletonScreen(source.id));
+            
+            const success = await fetchAllNewsAndCache();
 
-            // 並行獲取所有數據
-            const fetchPromises = SOURCES.map(source => fetchNewsForSource(source));
-            const results = await Promise.all(fetchPromises);
+            if (!success && !cacheLoaded) {
+                SOURCES.forEach(source => {
+                    if (ALL_NEWS_DATA[source.id] === 'ERROR' || !ALL_NEWS_DATA[source.id]) {
+                        document.getElementById(source.id).innerHTML = '<div class="error">網絡或API錯誤，無法載入數據。</div>';
+                    }
+                });
+            } 
+            
+            populateDistrictFilter(ALL_NEWS_DATA);
 
-            // 存儲數據
-            SOURCES.forEach((source, index) => {
-                ALL_NEWS_DATA[source.id] = results[index];
-            });
+            renderAllColumns(); 
 
-            // 設置篩選/搜索事件監聽器 (使用 Debounce 優化)
             const debouncedRender = debounce(renderAllColumns, 300);
-
             document.getElementById('status-filter').addEventListener('change', renderAllColumns);
+            document.getElementById('district-filter').addEventListener('change', renderAllColumns); 
             document.getElementById('sort-order').addEventListener('change', renderAllColumns);
             document.getElementById('keyword-search').addEventListener('input', debouncedRender);
             document.getElementById('reset-filters-btn').addEventListener('click', resetFilters);
             
-            // 首次渲染所有數據
-            renderAllColumns();
-
-            // 設置其他 UI 邏輯
             setupSearchClear();
             setupBackToTop();
-            
-            // 更新最後更新時間
-            const now = new Date();
-            document.getElementById('last-update').textContent = `數據更新於：${now.toLocaleDateString('zh-HK')} ${now.toLocaleTimeString('zh-HK')}`;
         }
 
-        // 頁面加載完成後執行初始化
         window.addEventListener('load', init);
+
+        function renderSkeletonScreen(containerId, count = 5) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = ''; 
+            
+            let html = '<div class="news-list-content">';
+            for (let i = 0; i < count; i++) {
+                html += `
+                    <div class="skeleton-item">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line long"></div>
+                        <div class="skeleton-line medium"></div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function setupDarkModeToggle() {
+            const toggleBtn = document.getElementById('mode-toggle');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            let currentMode = localStorage.getItem('theme');
+            if (!currentMode) {
+                currentMode = prefersDark ? 'dark' : 'light';
+            }
+
+            function applyMode(mode) {
+                document.body.classList.toggle('dark-mode', mode === 'dark');
+                toggleBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
+                localStorage.setItem('theme', mode);
+            }
+
+            applyMode(currentMode);
+
+            toggleBtn.addEventListener('click', () => {
+                const newMode = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+                applyMode(newMode);
+            });
+        }
+        
+        function setupSearchClear() {
+            const searchInput = document.getElementById('keyword-search');
+            const clearButton = document.getElementById('clear-search-btn');
+            function toggleClearButton() { clearButton.classList.toggle('visible', searchInput.value.length > 0); }
+            clearButton.onclick = () => { searchInput.value = ''; toggleClearButton(); renderAllColumns(); };
+            searchInput.oninput = () => toggleClearButton();
+            toggleClearButton();
+        }
+
+        function setupBackToTop() {
+            const backToTopBtn = document.getElementById('back-to-top-btn');
+            const scrollThreshold = 300; 
+            window.onscroll = () => {
+                const isVisible = document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold;
+                backToTopBtn.classList.toggle('visible', isVisible);
+            };
+            backToTopBtn.onclick = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+        }
+        
+
     </script>
 </body>
 </html>
